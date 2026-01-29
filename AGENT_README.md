@@ -2,7 +2,7 @@
 
 ## Current State
 
-- **Phase:** 4 – About & Contact (Complete)
+- **Phase:** 5 – Polish & Performance (Complete)
 - **Last Agent:** Claude Sonnet 4.5
 - **Blocking Issues:** None  
 
@@ -56,3 +56,9 @@ npm run build      # outputs to dist/
 | Experience timeline | ✅ |
 | Social links | ✅ |
 | Contact form with honeypot | ✅ |
+| Sitemap integration | ✅ |
+| robots.txt | ✅ |
+| README.md | ✅ |
+| Performance optimizations | ✅ |
+| SEO meta tags | ✅ |
+| PWA manifest | ✅ |
