@@ -2,7 +2,7 @@
 
 ## Current State
 
-- **Phase:** 1 – Core Pages & Navigation (Complete)
+- **Phase:** 2 – Projects Showcase (Complete)
 - **Last Agent:** Claude Sonnet 4.5
 - **Blocking Issues:** None  
 
@@ -38,5 +38,10 @@ npm run build      # outputs to dist/
 | `ThemeToggle.tsx` | ✅ |
 | `index.astro` (hero) | ✅ |
 | `global.css` (theming) | ✅ |
-| `ProjectCard.astro` | ⬜ |
-| `VideoPlayer.tsx` | ⬜ |
+| `ProjectCard.astro` | ✅ |
+| `VideoPlayer.tsx` | ✅ |
+| `ChartEmbed.tsx` | ✅ |
+| `projects.astro` | ✅ |
+| `projects/[...slug].astro` | ✅ |
+| `content/config.ts` | ✅ |
+| Sample project files (3) | ✅ |
