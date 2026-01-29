@@ -2,7 +2,7 @@
 
 ## Current State
 
-- **Phase:** 3 – Blog/Notes (Complete)
+- **Phase:** 4 – About & Contact (Complete)
 - **Last Agent:** Claude Sonnet 4.5
 - **Blocking Issues:** None  
 
@@ -50,3 +50,9 @@ npm run build      # outputs to dist/
 | `blog/[...slug].astro` | ✅ |
 | Sample blog posts (3) | ✅ |
 | MDX integration | ✅ |
+| `about.astro` | ✅ |
+| `ContactForm.tsx` | ✅ |
+| Skills section | ✅ |
+| Experience timeline | ✅ |
+| Social links | ✅ |
+| Contact form with honeypot | ✅ |
