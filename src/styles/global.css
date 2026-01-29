@@ -1,1 +1,62 @@
 @import "tailwindcss";
+
+:root {
+  /* Light theme colors */
+  --color-background: 255 255 255;
+  --color-foreground: 17 24 39;
+  --color-primary: 37 99 235;
+  --color-secondary: 107 114 128;
+  --color-accent: 99 102 241;
+  --color-muted: 243 244 246;
+  --color-border: 229 231 235;
+}
+
+.dark {
+  /* Dark theme colors */
+  --color-background: 17 24 39;
+  --color-foreground: 243 244 246;
+  --color-primary: 96 165 250;
+  --color-secondary: 156 163 175;
+  --color-accent: 129 140 248;
+  --color-muted: 31 41 55;
+  --color-border: 55 65 81;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(var(--color-muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--color-secondary));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--color-primary));
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}

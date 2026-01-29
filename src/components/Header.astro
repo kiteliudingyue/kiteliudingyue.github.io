@@ -1,0 +1,73 @@
+---
+import ThemeToggle from './ThemeToggle';
+
+const navItems = [
+  { name: 'Home', href: '/' },
+  { name: 'Projects', href: '/projects' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'About', href: '/about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+  <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+      Kite Liu
+    </a>
+
+    <div class="hidden md:flex items-center gap-6">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+            currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-700 dark:text-gray-300'
+          }`}
+        >
+          {item.name}
+        </a>
+      ))}
+      <ThemeToggle client:load />
+    </div>
+
+    <button
+      id="mobile-menu-button"
+      class="md:hidden text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+      aria-label="Toggle menu"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+  </nav>
+
+  <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 dark:border-gray-800">
+    <div class="container mx-auto px-4 py-4 flex flex-col gap-4">
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          class={`text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400 ${
+            currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href))
+              ? 'text-blue-600 dark:text-blue-400'
+              : 'text-gray-700 dark:text-gray-300'
+          }`}
+        >
+          {item.name}
+        </a>
+      ))}
+      <ThemeToggle client:load />
+    </div>
+  </div>
+</header>
+
+<script>
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuButton?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>

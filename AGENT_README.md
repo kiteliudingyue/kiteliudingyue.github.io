@@ -2,8 +2,8 @@
 
 ## Current State
 
-- **Phase:** 0 – Not Started  
-- **Last Agent:** (none)  
+- **Phase:** 1 – Core Pages & Navigation (Complete)
+- **Last Agent:** Claude Sonnet 4.5
 - **Blocking Issues:** None  
 
 ## Quick Start
@@ -31,8 +31,12 @@ npm run build      # outputs to dist/
 
 | File | Status |
 |------|--------|
-| `deploy.yml` | ⬜ |
-| `BaseLayout.astro` | ⬜ |
-| `ThemeToggle.tsx` | ⬜ |
+| `deploy.yml` | ✅ |
+| `BaseLayout.astro` | ✅ |
+| `Header.astro` | ✅ |
+| `Footer.astro` | ✅ |
+| `ThemeToggle.tsx` | ✅ |
+| `index.astro` (hero) | ✅ |
+| `global.css` (theming) | ✅ |
 | `ProjectCard.astro` | ⬜ |
 | `VideoPlayer.tsx` | ⬜ |

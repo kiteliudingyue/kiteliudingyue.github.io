@@ -1,17 +1,102 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Kite Liu - Data Analyst & Developer">
+	<section class="hero-section container mx-auto px-4 py-20 md:py-32">
+		<div class="max-w-4xl mx-auto text-center">
+			<h1 class="hero-title text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
+				<span class="block text-gray-900 dark:text-white">Hi, I'm</span>
+				<span class="block gradient-text">Kite Liu</span>
+			</h1>
+
+			<p class="hero-subtitle text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-8 animate-fade-in-up">
+				Data Analyst & Developer
+			</p>
+
+			<p class="text-lg text-gray-700 dark:text-gray-300 mb-12 max-w-2xl mx-auto animate-fade-in-up-delay">
+				I transform data into insights and build interactive experiences.
+				Passionate about visualization, storytelling, and making complex things simple.
+			</p>
+
+			<div class="flex flex-wrap gap-4 justify-center animate-fade-in-up-delay-2">
+				<a
+					href="/projects"
+					class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+				>
+					View Projects
+				</a>
+				<a
+					href="/about"
+					class="px-6 py-3 border-2 border-gray-300 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-400 text-gray-900 dark:text-white font-medium rounded-lg transition-colors"
+				>
+					About Me
+				</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<style>
+	.gradient-text {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		animation: gradient-shift 3s ease infinite;
+	}
+
+	@keyframes gradient-shift {
+		0%, 100% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+	}
+
+	.hero-title {
+		animation: fade-in-down 0.8s ease-out;
+	}
+
+	@keyframes fade-in-down {
+		from {
+			opacity: 0;
+			transform: translateY(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-in-up {
+		animation: fade-in-up 0.8s ease-out 0.2s both;
+	}
+
+	.animate-fade-in-up-delay {
+		animation: fade-in-up 0.8s ease-out 0.4s both;
+	}
+
+	.animate-fade-in-up-delay-2 {
+		animation: fade-in-up 0.8s ease-out 0.6s both;
+	}
+
+	@keyframes fade-in-up {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.hero-section {
+		min-height: calc(100vh - 200px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+</style>
