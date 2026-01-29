@@ -11,8 +11,8 @@ interface Props {
 }
 
 const {
-  title = 'Kite Liu - Personal Website',
-  description = 'Personal portfolio and blog showcasing projects, data visualizations, and technical writing.',
+  title = 'Dingyue (Kite) Liu - Research Scientist',
+  description = 'Research Scientist at Uniswap Labs. PhD in Economics from UC Santa Barbara. Researching DeFi, blockchain economics, and decentralized exchanges.',
   image = '/og-image.png',
   type = 'website'
 } = Astro.props;
@@ -33,8 +33,8 @@ const imageURL = new URL(image, Astro.site);
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
-    <meta name="author" content="Kite Liu" />
-    <meta name="keywords" content="data analysis, visualization, machine learning, web development, portfolio" />
+    <meta name="author" content="Dingyue (Kite) Liu" />
+    <meta name="keywords" content="DeFi, blockchain, economics, decentralized finance, Uniswap, research, cryptocurrency" />
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
@@ -51,7 +51,7 @@ const imageURL = new URL(image, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={imageURL} />
-    <meta property="og:site_name" content="Kite Liu" />
+    <meta property="og:site_name" content="Dingyue (Kite) Liu" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->

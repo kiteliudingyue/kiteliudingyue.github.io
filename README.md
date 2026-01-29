@@ -1,9 +1,9 @@
-# Personal Website
+# Dingyue (Kite) Liu - Personal Website
 
 [![Deploy to GitHub Pages](https://github.com/kiteliudingyue/kiteliudingyue.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/kiteliudingyue/kiteliudingyue.github.io/actions/workflows/deploy.yml)
 [![Lighthouse Score](https://img.shields.io/badge/lighthouse-90%2B-brightgreen)](https://kiteliudingyue.github.io)
 
-A modern, performant personal portfolio and blog built with Astro, React, and Tailwind CSS. Features interactive project showcases, technical blog posts, and a comprehensive about section.
+Personal website for Dingyue (Kite) Liu, Research Scientist at Uniswap Labs. Built with Astro, React, and Tailwind CSS. Features research publications, academic work, and professional information.
 
 🌐 **Live Site**: [kiteliudingyue.github.io](https://kiteliudingyue.github.io)
 
@@ -12,10 +12,10 @@ A modern, performant personal portfolio and blog built with Astro, React, and Ta
 - **⚡ Lightning Fast**: Built with Astro for optimal performance (90+ Lighthouse score)
 - **🌗 Dark Mode**: Seamless theme switching with localStorage persistence
 - **📱 Responsive**: Mobile-first design that works on all devices
-- **📝 MDX Blog**: Write interactive blog posts with embedded components
-- **🎨 Projects Showcase**: Interactive project cards with chart embeds and video demos
+- **📝 Research Publications**: Showcasing academic papers and working papers
+- **🎓 Academic Focus**: Highlighting DeFi and blockchain economics research
 - **📧 Contact Form**: Functional contact form with spam prevention
-- **🔍 SEO Optimized**: Auto-generated sitemap and meta tags
+- **🔍 SEO Optimized**: Auto-generated sitemap and comprehensive meta tags
 - **♿ Accessible**: WCAG compliant with keyboard navigation support
 
 ## 🚀 Tech Stack
@@ -250,8 +250,9 @@ MIT License - feel free to use this as a template for your own site!
 
 ## 📧 Contact
 
-- **Email**: your.email@example.com
+- **Email**: kiteliudingyue@gmail.com
 - **GitHub**: [@kiteliudingyue](https://github.com/kiteliudingyue)
+- **LinkedIn**: [Dingyue Liu](https://www.linkedin.com/in/dingyue-liu)
 - **Website**: [kiteliudingyue.github.io](https://kiteliudingyue.github.io)
 
 ---

@@ -79,7 +79,7 @@ export default function ContactForm({ formspreeId }: ContactFormProps) {
         }
       } else {
         // Fallback to mailto
-        const mailtoLink = `mailto:your.email@example.com?subject=${encodeURIComponent(
+        const mailtoLink = `mailto:kiteliudingyue@gmail.com?subject=${encodeURIComponent(
           formData.subject
         )}&body=${encodeURIComponent(
           `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
