@@ -2,7 +2,7 @@
 
 ## Current State
 
-- **Phase:** 2 – Projects Showcase (Complete)
+- **Phase:** 3 – Blog/Notes (Complete)
 - **Last Agent:** Claude Sonnet 4.5
 - **Blocking Issues:** None  
 
@@ -45,3 +45,8 @@ npm run build      # outputs to dist/
 | `projects/[...slug].astro` | ✅ |
 | `content/config.ts` | ✅ |
 | Sample project files (3) | ✅ |
+| `BlogLayout.astro` | ✅ |
+| `blog/index.astro` | ✅ |
+| `blog/[...slug].astro` | ✅ |
+| Sample blog posts (3) | ✅ |
+| MDX integration | ✅ |

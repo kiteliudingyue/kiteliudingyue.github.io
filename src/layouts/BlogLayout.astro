@@ -1,0 +1,150 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, tags } = post.data;
+
+const formattedPubDate = new Date(pubDate).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const formattedUpdatedDate = updatedDate
+  ? new Date(updatedDate).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  : null;
+
+// Estimate reading time (rough calculation: 200 words per minute)
+const { Content } = await post.render();
+const wordCount = post.body.split(/\s+/).length;
+const readingTime = Math.ceil(wordCount / 200);
+---
+
+<BaseLayout title={`${title} - Kite Liu`} description={description}>
+  <article class="container mx-auto px-4 py-12 md:py-16">
+    <div class="max-w-3xl mx-auto">
+      <nav class="mb-8">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+          Back to Blog
+        </a>
+      </nav>
+
+      {heroImage && (
+        <div class="mb-8 rounded-lg overflow-hidden">
+          <img
+            src={heroImage}
+            alt={title}
+            class="w-full h-auto"
+          />
+        </div>
+      )}
+
+      <header class="mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          {title}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-6">
+          <time datetime={pubDate.toISOString()}>
+            {formattedPubDate}
+          </time>
+          {formattedUpdatedDate && (
+            <span class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              Updated {formattedUpdatedDate}
+            </span>
+          )}
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {readingTime} min read
+          </span>
+        </div>
+
+        {tags && tags.length > 0 && (
+          <div class="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <span class="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </header>
+
+      <div class="prose prose-lg dark:prose-invert max-w-none
+        prose-headings:text-gray-900 dark:prose-headings:text-white
+        prose-headings:font-bold
+        prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
+        prose-h3:text-2xl prose-h3:mt-10 prose-h3:mb-4
+        prose-p:text-gray-700 dark:prose-p:text-gray-300
+        prose-p:leading-relaxed
+        prose-a:text-blue-600 dark:prose-a:text-blue-400
+        prose-a:no-underline hover:prose-a:underline
+        prose-strong:text-gray-900 dark:prose-strong:text-white
+        prose-strong:font-semibold
+        prose-code:text-gray-900 dark:prose-code:text-white
+        prose-code:bg-gray-100 dark:prose-code:bg-gray-800
+        prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+        prose-code:text-sm prose-code:font-mono
+        prose-code:before:content-none prose-code:after:content-none
+        prose-pre:bg-gray-900 dark:prose-pre:bg-gray-950
+        prose-pre:border prose-pre:border-gray-700
+        prose-blockquote:border-l-4 prose-blockquote:border-blue-500
+        prose-blockquote:bg-gray-50 dark:prose-blockquote:bg-gray-800/50
+        prose-blockquote:py-4 prose-blockquote:px-6
+        prose-blockquote:not-italic
+        prose-img:rounded-lg prose-img:shadow-lg
+        prose-ul:list-disc prose-ol:list-decimal
+        prose-li:text-gray-700 dark:prose-li:text-gray-300">
+        <Content />
+      </div>
+
+      <footer class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
+        <div class="flex items-center justify-between">
+          <a
+            href="/blog"
+            class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            More articles
+          </a>
+
+          <div class="flex gap-4">
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(Astro.url.href)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              aria-label="Share on Twitter"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </article>
+</BaseLayout>
