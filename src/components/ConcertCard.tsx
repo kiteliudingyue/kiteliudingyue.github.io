@@ -64,8 +64,20 @@ export default function ConcertCard({ concert }: Props) {
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const newMutedState = !isMuted;
+      videoRef.current.muted = newMutedState;
+      videoRef.current.volume = newMutedState ? 0 : 1;
+      setIsMuted(newMutedState);
+
+      // Restart video if unmuting to ensure audio plays
+      if (!newMutedState && isPlaying) {
+        const currentTime = videoRef.current.currentTime;
+        videoRef.current.load();
+        videoRef.current.currentTime = currentTime;
+        videoRef.current.play().catch(err => {
+          console.error('Error replaying video with audio:', err);
+        });
+      }
     }
   };
 
@@ -92,7 +104,7 @@ export default function ConcertCard({ concert }: Props) {
   const videoBasename = videoUrl.replace(/\.(mp4|webm)$/, '');
 
   return (
-    <article className="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <article className="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-w-sm mx-auto">
       {featured && (
         <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
           Featured
