@@ -5,8 +5,8 @@ date: 2025-09-26
 location: "New York, NY"
 posterUrl: "/concerts/posters/charlie-puth-blue-note-2025.jpg"
 videoUrl: "/concerts/videos/charlie-puth-blue-note-2025"
-tags: ["Pop", "2025", "Livehouse"]
+tags: []
 featured: true
 ---
 
-An intimate performance at the legendary Blue Note Jazz Club. The venue's acoustics and atmosphere made for an unforgettable evening.
+Second time seeing Charlie Puth live, and Blue Note made it hit different. That room is so intimate; I got lucky with seats right up close. Felt like a private show.

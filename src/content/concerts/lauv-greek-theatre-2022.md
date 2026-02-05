@@ -5,8 +5,8 @@ date: 2022-09-09
 location: "Los Angeles, CA"
 posterUrl: "/concerts/posters/lauv-greek-theatre-2022.jpg"
 videoUrl: "/concerts/videos/lauv-greek-theatre-2022"
-tags: ["Pop", "2022", "Outdoor"]
+tags: []
 featured: false
 ---
 
-Amazing outdoor concert at the Greek Theatre. Perfect LA evening with great music!
+Two years after his 2020 show was canceled by COVID, I finally saw Lauv live at the Greek. It drizzled that night—and he played "Paris in the Rain." Couldn't have scripted it better.
