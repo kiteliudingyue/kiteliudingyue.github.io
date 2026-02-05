@@ -11,7 +11,14 @@ export default function ConcertCard({ concert }: Props) {
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(() => {
+    // Check localStorage for global mute preference
+    if (typeof window !== 'undefined') {
+      const savedMute = localStorage.getItem('concertVideosMuted');
+      return savedMute === null ? true : savedMute === 'true';
+    }
+    return true;
+  });
 
   const formattedDate = new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -27,6 +34,21 @@ export default function ConcertCard({ concert }: Props) {
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Listen for global mute changes from other videos
+  useEffect(() => {
+    const handleGlobalMuteChange = (e: CustomEvent) => {
+      const newMutedState = e.detail.muted;
+      setIsMuted(newMutedState);
+      if (videoRef.current) {
+        videoRef.current.muted = newMutedState;
+        videoRef.current.volume = newMutedState ? 0 : 1;
+      }
+    };
+
+    window.addEventListener('concertMuteChange' as any, handleGlobalMuteChange as any);
+    return () => window.removeEventListener('concertMuteChange' as any, handleGlobalMuteChange as any);
   }, []);
 
   // Handle hover play on desktop
@@ -60,14 +82,24 @@ export default function ConcertCard({ concert }: Props) {
     }
   };
 
-  // Toggle mute/unmute
+  // Toggle mute/unmute globally for all videos
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
       const newMutedState = !isMuted;
+
+      // Save preference to localStorage
+      localStorage.setItem('concertVideosMuted', String(newMutedState));
+
+      // Update this video
       videoRef.current.muted = newMutedState;
       videoRef.current.volume = newMutedState ? 0 : 1;
       setIsMuted(newMutedState);
+
+      // Broadcast to all other videos
+      window.dispatchEvent(new CustomEvent('concertMuteChange', {
+        detail: { muted: newMutedState }
+      }));
 
       // Restart video if unmuting to ensure audio plays
       if (!newMutedState && isPlaying) {
