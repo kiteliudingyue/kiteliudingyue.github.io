@@ -26,45 +26,13 @@ const allTags = [...new Set(allConcerts.flatMap(concert => concert.data.tags))].
         Fun & Personal
       </h1>
       <p class="text-lg text-gray-600 dark:text-gray-400">
-        A collection of concert memories and personal experiences. Hover over cards (or tap on mobile) to watch short video clips from live performances I've attended.
+        Here's a few moments from some of the concerts I've been to. Hover over cards (or tap on mobile) to watch short video clips and click the speaker to hear the audio.
       </p>
     </header>
 
-    {allTags.length > 0 && (
-      <div class="mb-8">
-        <details class="group">
-          <summary class="cursor-pointer flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 mb-4">
-            <svg class="w-5 h-5 transition-transform group-open:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-            Filter by Tag ({allTags.length} tags)
-          </summary>
-
-          <div class="flex flex-wrap gap-2 mb-6 ml-7">
-            <button
-              data-tag="all"
-              class="tag-filter px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              All Concerts
-            </button>
-            {allTags.map((tag) => (
-              <button
-                data-tag={tag}
-                class="tag-filter px-4 py-2 text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </details>
-      </div>
-    )}
-
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
       {sortedConcerts.map((concert) => (
-        <div class="concert-card" data-tags={JSON.stringify(concert.data.tags)}>
-          <ConcertCard concert={concert} client:visible />
-        </div>
+        <ConcertCard concert={concert} client:visible />
       ))}
     </div>
 
@@ -77,45 +45,11 @@ const allTags = [...new Set(allConcerts.flatMap(concert => concert.data.tags))].
     )}
 
     {sortedConcerts.length > 0 && (
-      <footer class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+      <footer class="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800">
         <p class="text-sm text-gray-500 dark:text-gray-400 text-center max-w-2xl mx-auto">
-          <strong>Copyright Notice:</strong> Concert clips (10-15 seconds) are from live performances I personally attended,
-          shared for educational and personal archival purposes under fair use guidelines.
+          <strong>Note:</strong> These short clips are from concerts I personally attended, shared for personal memories and archival purposes.
         </p>
       </footer>
     )}
   </div>
 </BaseLayout>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const filterButtons = document.querySelectorAll('.tag-filter');
-    const concertCards = document.querySelectorAll('.concert-card');
-
-    filterButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const selectedTag = button.getAttribute('data-tag');
-
-        // Update active button state
-        filterButtons.forEach(btn => {
-          btn.classList.remove('bg-blue-600', 'text-white');
-          btn.classList.add('bg-gray-100', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
-        });
-        button.classList.add('bg-blue-600', 'text-white');
-        button.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
-
-        // Filter concerts
-        concertCards.forEach(card => {
-          const cardElement = card as HTMLElement;
-          const tags = JSON.parse(cardElement.getAttribute('data-tags') || '[]');
-
-          if (selectedTag === 'all' || tags.includes(selectedTag)) {
-            cardElement.style.display = 'block';
-          } else {
-            cardElement.style.display = 'none';
-          }
-        });
-      });
-    });
-  });
-</script>

@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default function ConcertCard({ concert }: Props) {
-  const { artist, venue, date, location, posterUrl, videoUrl, featured } = concert.data;
+  const { artist, venue, date, location, posterUrl, videoUrl } = concert.data;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -105,12 +105,6 @@ export default function ConcertCard({ concert }: Props) {
 
   return (
     <article className="group relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 max-w-sm mx-auto">
-      {featured && (
-        <div className="absolute top-4 left-4 z-10 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-          Featured
-        </div>
-      )}
-
       <div
         className="relative aspect-[9/16] bg-gray-100 dark:bg-gray-900 overflow-hidden cursor-pointer"
         onMouseEnter={() => !isMobile && setIsHovered(true)}
