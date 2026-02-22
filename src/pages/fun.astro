@@ -14,6 +14,27 @@ const sortedConcerts = allConcerts.sort((a, b) => {
 
 // Get all unique tags
 const allTags = [...new Set(allConcerts.flatMap(concert => concert.data.tags))].sort();
+
+const vlogs = [
+  {
+    title: 'Ball Crew at Indian Wells',
+    description: 'My experience working as ball crew at the BNP Paribas Open in Indian Wells.',
+    embedUrl: 'https://player.bilibili.com/player.html?bvid=BV16S4y127FQ&autoplay=0',
+    platform: 'bilibili' as const,
+  },
+  {
+    title: 'Zoom Era Games with Friends',
+    description: 'Fun and games with friends during the remote work era.',
+    embedUrl: 'https://player.bilibili.com/player.html?bvid=BV16C4y1b7u3&autoplay=0',
+    platform: 'bilibili' as const,
+  },
+  {
+    title: 'Video Production for Purdue RecWell',
+    description: 'A video I produced for Purdue Recreational Sports.',
+    embedUrl: 'https://player.bilibili.com/player.html?bvid=BV1xK41157Vr&autoplay=0',
+    platform: 'bilibili' as const,
+  },
+];
 ---
 
 <BaseLayout
@@ -50,6 +71,41 @@ const allTags = [...new Set(allConcerts.flatMap(concert => concert.data.tags))].
           <strong>Note:</strong> These short clips are from concerts I personally attended, shared for personal memories and archival purposes.
         </p>
       </footer>
+    )}
+
+    {vlogs.length > 0 && (
+      <section class="mt-20">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          Vlogs
+        </h2>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-3xl">
+          Longer videos from travels, events, and everyday life.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+          {vlogs.map((vlog) => (
+            <article class="group">
+              <div class="relative aspect-video rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                <iframe
+                  src={vlog.embedUrl}
+                  title={vlog.title}
+                  class="absolute inset-0 w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                  loading="lazy"
+                />
+              </div>
+              <h3 class="mt-3 text-lg font-semibold text-gray-900 dark:text-white">
+                {vlog.title}
+              </h3>
+              <p class="mt-1 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                {vlog.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
     )}
   </div>
 </BaseLayout>
