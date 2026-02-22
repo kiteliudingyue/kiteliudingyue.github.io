@@ -1,18 +1,15 @@
 import { defineCollection, z } from 'astro:content';
 
-const projects = defineCollection({
+const research = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    featured: z.boolean().default(false),
-    tags: z.array(z.string()),
-    image: z.string().optional(),
-    videoUrl: z.string().optional(),
-    embedUrl: z.string().optional(),
-    githubUrl: z.string().optional(),
-    liveUrl: z.string().optional(),
+    authors: z.string(),
+    venue: z.string().optional(),
+    pdfUrl: z.string().optional(),
+    status: z.enum(['Published', 'Working Paper', 'Whitepaper']),
   }),
 });
 
@@ -43,4 +40,4 @@ const concerts = defineCollection({
   }),
 });
 
-export const collections = { projects, blog, concerts };
+export const collections = { research, blog, concerts };
