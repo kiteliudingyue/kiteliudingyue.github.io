@@ -6,10 +6,14 @@ const research = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    authors: z.string(),
+    authors: z.array(z.object({
+      name: z.string(),
+      url: z.string().optional(),
+    })).default([]),
     venue: z.string().optional(),
     pdfUrl: z.string().optional(),
     status: z.enum(['Published', 'Working Paper', 'Whitepaper']),
+    sortOrder: z.number(),
   }),
 });
 
