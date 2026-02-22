@@ -13,6 +13,7 @@ authors:
     url: "https://moallemi.com/ciamac/"
   - name: "Brad Bachu"
     url: "https://bradbachu.github.io/"
+hook: "Concentrate capital. / Chains, pairs, and fees all matter. / Depth is not random."
 venue: "4th International Cryptoasset Analytics Workshop (CAAW), accepted"
 pdfUrl: "https://arxiv.org/abs/2410.19107"
 status: "Published"

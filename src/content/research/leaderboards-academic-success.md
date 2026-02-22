@@ -8,6 +8,7 @@ authors:
   - name: "Ruth Morales"
   - name: "Caroline Zhang"
     url: "https://carolinezhangcjz.github.io/"
+hook: "Post the scoreboard. / Watch the deadlines get easier. / Gamify the grind."
 status: "Working Paper"
 sortOrder: 2
 ---

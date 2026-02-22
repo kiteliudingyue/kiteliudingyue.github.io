@@ -4,6 +4,7 @@ description: "Introduces a permissionless market bootstrapping framework for Uni
 pubDate: 2024-12-01
 authors: []
 pdfUrl: "https://docs.uniswap.org/whitepaper_cca.pdf"
+hook: "Auction to pool. / No permission required. / Markets bootstrap."
 status: "Whitepaper"
 sortOrder: 1
 ---

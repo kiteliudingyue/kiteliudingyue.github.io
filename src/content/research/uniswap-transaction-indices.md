@@ -11,6 +11,7 @@ authors:
     url: "https://sites.google.com/view/emmajorgensen/"
   - name: "Luyao Zhang"
     url: "https://scholar.google.com/citations?user=vdP2Pb0AAAAJ&hl=en"
+hook: "Fifty million swaps. / Across every network — / one open dataset."
 venue: "Scientific Data 12, 93 (2025)"
 pdfUrl: "https://doi.org/10.1038/s41597-024-04042-0"
 status: "Published"

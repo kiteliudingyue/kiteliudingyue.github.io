@@ -13,6 +13,7 @@ authors:
     url: "https://sites.cs.ucsb.edu/~chris/"
   - name: "Giovanni Vigna"
     url: "https://sites.cs.ucsb.edu/~vigna/"
+hook: "Nobody changed it. / One smarter default later — / millions kept safe."
 venue: "Financial Cryptography and Data Security 2024"
 pdfUrl: "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4585229"
 status: "Published"

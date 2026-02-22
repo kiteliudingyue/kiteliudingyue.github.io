@@ -12,6 +12,7 @@ const research = defineCollection({
     })).default([]),
     venue: z.string().optional(),
     pdfUrl: z.string().optional(),
+    hook: z.string().optional(),
     status: z.enum(['Published', 'Working Paper', 'Whitepaper']),
     sortOrder: z.number(),
   }),

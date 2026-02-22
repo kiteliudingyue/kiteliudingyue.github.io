@@ -5,6 +5,7 @@ pubDate: 2023-06-01
 authors:
   - name: "Yixin Chen"
     url: "https://yixinelainechen.github.io/"
+hook: "Away game tonight. / Reports rise fourteen percent. / Game day has a cost."
 status: "Working Paper"
 sortOrder: 3
 ---
