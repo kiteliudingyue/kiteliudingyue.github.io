@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniMadness Bracket Race</title>
+<style>
+  :root {
+    --bg: #191B1F;
+    --bg2: #212429;
+    --bg3: #2C2F36;
+    --border: #40444F;
+    --text: #ffffff;
+    --text-dim: #6C7284;
+    --text-muted: #C3C5CB;
+    --accent: #FF007A;
+    --correct: #27AE60;
+    --canvas-bg: #191B1F;
+    --grid-major: rgba(64,68,79,0.4);
+    --grid-minor: rgba(64,68,79,0.15);
+    --score-label: #6C7284;
+    --name-label: #C3C5CB;
+  }
+  body.light {
+    --bg: #F7F8FA;
+    --bg2: #EDEEF2;
+    --bg3: #E0E1E6;
+    --border: #B0B3BA;
+    --text: #191B1F;
+    --text-dim: #6C7284;
+    --text-muted: #555A6B;
+    --canvas-bg: #F0F1F5;
+    --grid-major: rgba(0,0,0,0.12);
+    --grid-minor: rgba(0,0,0,0.04);
+    --score-label: #555A6B;
+    --name-label: #333;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', monospace;
+    overflow: hidden;
+  }
+
+  .header {
+    background: #FF007A;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .header h1 {
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .header-buttons { display: flex; gap: 8px; }
+  .toggle-btn, .theme-btn {
+    background: rgba(0,0,0,0.3);
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .toggle-btn:hover, .theme-btn:hover { background: rgba(0,0,0,0.5); }
+
+  .main {
+    display: flex;
+    height: calc(100vh - 110px);
+  }
+
+  .track-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+  }
+  canvas#raceCanvas {
+    display: block;
+  }
+
+  /* Matchup card — top center overlay */
+  .matchup-card {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg3);
+    border: 2px solid var(--accent);
+    padding: 12px 18px;
+    font-size: 14px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 280px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 6px;
+  }
+  .matchup-card.show { opacity: 1; }
+  .matchup-card img { width: 48px; height: 48px; }
+  .matchup-card .mc-vs {
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 18px;
+  }
+  .matchup-card .mc-team {
+    text-align: center;
+    line-height: 1.3;
+  }
+  .matchup-card .mc-team .seed { color: var(--text-dim); font-size: 11px; }
+  .matchup-card .mc-team .abbrev { font-weight: bold; font-size: 16px; }
+  .matchup-card .mc-team.winner .abbrev { color: var(--correct); }
+  .matchup-card .mc-info {
+    font-size: 11px;
+    color: var(--text-dim);
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+    line-height: 1.5;
+  }
+
+  /* Toast — top right overlay */
+  .toast {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--bg3);
+    border: 2px solid var(--accent);
+    padding: 8px 14px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  .sidebar {
+    width: 280px;
+    background: var(--bg2);
+    border-left: 2px solid var(--border);
+    overflow-y: auto;
+    padding: 12px;
+    flex-shrink: 0;
+  }
+  .sidebar h2 {
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .game-info {
+    background: var(--bg3);
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--accent);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .game-info .round-label { color: var(--accent); }
+  .game-info .game-name { color: var(--text); font-weight: bold; }
+  .game-info .game-date { color: var(--text-dim); }
+
+  .leaderboard-entry {
+    display: flex;
+    align-items: center;
+    padding: 5px 8px;
+    margin-bottom: 2px;
+    background: var(--bg3);
+    font-size: 12px;
+    transition: background 0.3s;
+    position: relative;
+  }
+  .leaderboard-entry.highlight-up { background: rgba(39, 174, 96, 0.2); }
+  .leaderboard-entry.highlight-down { background: rgba(255, 0, 122, 0.2); }
+  .lb-rank { width: 24px; font-weight: bold; color: var(--text-dim); }
+  .lb-avatar { width: 20px; height: 20px; margin-right: 8px; image-rendering: pixelated; }
+  .lb-name { flex: 1; }
+  .lb-score { font-weight: bold; color: var(--accent); margin-left: 8px; }
+  .lb-pick { font-size: 10px; margin-left: 6px; padding: 1px 4px; }
+  .lb-pick.correct { color: var(--correct); }
+  .lb-pick.incorrect { color: var(--accent); }
+  .lb-pick.undecided { color: var(--text-dim); }
+  .lb-rank-change { font-size: 10px; width: 20px; text-align: center; }
+  .lb-rank-change.up { color: var(--correct); }
+  .lb-rank-change.down { color: var(--accent); }
+
+  .controls {
+    background: var(--bg3);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 2px solid var(--border);
+    height: 56px;
+  }
+  .controls button {
+    background: var(--border);
+    border: none;
+    color: var(--text);
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 16px;
+    cursor: pointer;
+    min-width: 40px;
+  }
+  .controls button:hover { background: var(--accent); color: #fff; }
+  .controls button.active { background: var(--accent); color: #fff; }
+
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .speed-control input[type=range] { width: 80px; accent-color: var(--accent); }
+  .game-counter { font-size: 13px; color: var(--text-muted); margin-left: auto; }
+  .game-counter span { color: var(--accent); font-weight: bold; }
+
+  @media (max-width: 768px) {
+    .main { flex-direction: column; }
+    .sidebar { width: 100%; height: 200px; border-left: none; border-top: 2px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="title">UNIMADNESS BRACKET RACE</h1>
+  <div class="header-buttons">
+    <button class="toggle-btn" id="toggleBtn">WOMEN'S</button>
+    <button class="theme-btn" id="themeBtn">&#128161;</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="track-container">
+    <canvas id="raceCanvas"></canvas>
+    <div class="matchup-card" id="matchupCard"></div>
+    <div class="toast" id="toast"></div>
+  </div>
+  <div class="sidebar">
+    <h2>STANDINGS</h2>
+    <div class="game-info" id="gameInfo">
+      <div class="round-label">--</div>
+      <div class="game-name">Press play to start the race!</div>
+      <div class="game-date"></div>
+    </div>
+    <div id="leaderboard"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="stepBack" title="Step back">&#9664;&#9664;</button>
+  <button id="playPause" title="Play/Pause">&#9654;</button>
+  <button id="stepFwd" title="Step forward">&#9654;&#9654;</button>
+  <div class="speed-control">
+    <span>Speed:</span>
+    <input type="range" id="speedSlider" min="1" max="10" value="5">
+  </div>
+  <div class="game-counter">
+    Game <span id="gameNum">0</span>/<span id="gameTotal">63</span>
+    &mdash; <span id="roundLabel">--</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// BASKETBALL AVATAR GENERATOR
+// ============================================================
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function hslToRgb(h, s, l) {
+  h /= 360; s /= 100; l /= 100;
+  let r, g, b;
+  if (s === 0) { r = g = b = l; }
+  else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1; if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    };
+    const q2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p2 = 2 * l - q2;
+    r = hue2rgb(p2, q2, h + 1/3);
+    g = hue2rgb(p2, q2, h);
+    b = hue2rgb(p2, q2, h - 1/3);
+  }
+  return `rgb(${Math.round(r*255)},${Math.round(g*255)},${Math.round(b*255)})`;
+}
+
+const BALL_RADIUS = 24;
+
+function generateAvatar(name) {
+  const h = hashStr(name);
+  const hue = h % 360;
+  const ballColor = hslToRgb(hue, 70, 45);
+  const ballColorLight = hslToRgb(hue, 70, 60);
+
+  // Generate a small canvas icon for leaderboard
+  const small = document.createElement('canvas');
+  small.width = 20; small.height = 20;
+  const sctx = small.getContext('2d');
+  sctx.beginPath();
+  sctx.arc(10, 10, 9, 0, Math.PI * 2);
+  sctx.fillStyle = ballColor;
+  sctx.fill();
+  sctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  sctx.lineWidth = 1;
+  sctx.stroke();
+
+  return { ballColor, ballColorLight, small };
+}
+
+// Draw a basketball-style circle with name
+function drawBall(x, y, radius, name, av, rotation) {
+  const cx = x + radius;
+  const cy = y + radius;
+
+  // Ball shadow
+  ctx.beginPath();
+  ctx.ellipse(cx + 2, cy + radius + 4, radius * 0.7, 4, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fill();
+
+  // Ball body
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.fillStyle = av.ballColor;
+  ctx.fill();
+
+  // Basketball lines (curved seams)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+  ctx.lineWidth = 1.5;
+
+  // Horizontal seam
+  ctx.beginPath();
+  ctx.moveTo(cx - radius, cy);
+  ctx.lineTo(cx + radius, cy);
+  ctx.stroke();
+
+  // Vertical seam (with rotation for bounce effect)
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - radius);
+  ctx.lineTo(cx, cy + radius);
+  ctx.stroke();
+
+  // Curved seams
+  ctx.beginPath();
+  ctx.arc(cx - radius * 0.4, cy, radius * 0.8, -0.8, 0.8);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx + radius * 0.4, cy, radius * 0.8, Math.PI - 0.8, Math.PI + 0.8);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Highlight / shine
+  ctx.beginPath();
+  ctx.arc(cx - radius * 0.3, cy - radius * 0.3, radius * 0.25, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.fill();
+
+  // Ball outline
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Text inside ball — size based on whether it's initials (2 chars) or name
+  ctx.fillStyle = '#fff';
+  const fontSize = name.length <= 2 ? Math.round(radius * 0.75) : Math.max(9, Math.min(12, radius * 0.5));
+  ctx.font = `bold ${fontSize}px Courier New`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, cx, cy);
+  ctx.textBaseline = 'alphabetic';
+  ctx.textAlign = 'left';
+}
+
+// ============================================================
+// THEME
+// ============================================================
+let isDark = true;
+let isPublic = true; // default public, set to false after auth
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function checkCompanyAccess() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('crew')) return false;
+  // Already authenticated this session
+  if (sessionStorage.getItem('unimadness_auth') === 'true') return true;
+  const pwd = prompt('Enter company password:');
+  if (!pwd) return false;
+  const hash = await sha256(pwd);
+  if (hash === 'f7c21fccbe98197a8199e266ad067d31f73a8e4f814b34dca60af767b5b71ba6') {
+    sessionStorage.setItem('unimadness_auth', 'true');
+    return true;
+  }
+  alert('Wrong password!');
+  return false;
+}
+let themeColors = {};
+function refreshThemeColors() {
+  const cs = getComputedStyle(document.body);
+  themeColors = {
+    canvasBg: cs.getPropertyValue('--canvas-bg').trim(),
+    gridMajor: cs.getPropertyValue('--grid-major').trim(),
+    gridMinor: cs.getPropertyValue('--grid-minor').trim(),
+    scoreLabel: cs.getPropertyValue('--score-label').trim(),
+    nameLabel: cs.getPropertyValue('--name-label').trim(),
+    accent: cs.getPropertyValue('--accent').trim(),
+    border: cs.getPropertyValue('--border').trim(),
+    correct: cs.getPropertyValue('--correct').trim(),
+    textDim: cs.getPropertyValue('--text-dim').trim(),
+  };
+}
+function getCSSVar(name) {
+  // Map CSS var names to cached values
+  const map = {
+    '--canvas-bg': 'canvasBg', '--grid-major': 'gridMajor', '--grid-minor': 'gridMinor',
+    '--score-label': 'scoreLabel', '--name-label': 'nameLabel', '--accent': 'accent',
+    '--border': 'border', '--correct': 'correct', '--text-dim': 'textDim',
+  };
+  return themeColors[map[name]] || '#fff';
+}
+
+// ============================================================
+// TEAM LOGO CACHE
+// ============================================================
+const logoCache = {};
+function loadLogo(url) {
+  if (!url) return null;
+  if (logoCache[url]) return logoCache[url];
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = url;
+  logoCache[url] = img;
+  return img;
+}
+
+function preloadLogos() {
+  if (!raceData) return;
+  raceData.games.forEach(g => {
+    (g.teams || []).forEach(t => { if (t.logo) loadLogo(t.logo); });
+  });
+}
+
+// ============================================================
+// RACE ENGINE
+// ============================================================
+let raceData = null;
+let avatars = {};
+let currentGame = -1; // -1 = before first game
+let playing = false;
+let playInterval = null;
+let tickSpeed = 2000;
+let currentTournament = 'men';
+
+// Animation state per player
+let playerStates = {};
+
+function initPlayerStates() {
+  playerStates = {};
+  if (!raceData) return;
+  raceData.players.forEach(p => {
+    playerStates[p.id] = {
+      x: 0, targetX: 0,
+      y: 0, targetY: 0,
+      score: 0,
+      rank: 1,
+      prevRank: 1,
+      frame: 'idle',       // 'idle' | 'jumping' | 'boost' | 'bonk'
+      frameTimer: 0,
+      boostParticles: [],
+      offsetY: 0,
+      // Jump animation state
+      jumpPhase: 0,        // 0=none, 1=jumping up, 2=hit block, 3=result (rise or fall)
+      jumpTimer: 0,
+      jumpCorrect: null,   // true/false after block hit
+      blockFlash: 0,       // timer for block color flash
+      bonkBounce: 0,       // bounce-back offset for wrong picks
+      eliminatedTimer: 0,  // timer for eliminated pick animation
+    };
+  });
+}
+
+// ============================================================
+// TRACK RENDERING (vertical: score goes bottom to top)
+// ============================================================
+const AVATAR_W = BALL_RADIUS * 2;
+const AVATAR_H = BALL_RADIUS * 2;
+const TRACK_TOP_MARGIN = 80;    // space for matchup card at top
+const TRACK_BOTTOM_MARGIN = 20; // ground at bottom
+const LANE_PAD = 8;
+
+let canvasEl, ctx, canvasW, canvasH;
+let cameraY = 0;
+let targetCameraY = 0;
+
+const LANE_LEFT = 60; // extra left margin to avoid overlap with score labels
+
+function getLaneX(index, totalPlayers) {
+  // Evenly space player lanes, with left margin for score axis
+  const usableW = canvasW - LANE_LEFT - LANE_PAD;
+  const laneW = usableW / totalPlayers;
+  return LANE_LEFT + index * laneW + laneW / 2 - AVATAR_W / 2;
+}
+
+// Dynamic score range — tracks the visible min/max
+let scoreRangeMin = 0;
+let scoreRangeMax = 100;
+let targetScoreMin = 0;
+let targetScoreMax = 100;
+
+function updateScoreRange() {
+  if (!raceData || currentGame < 0) {
+    targetScoreMin = 0;
+    targetScoreMax = 100;
+    return;
+  }
+  const game = raceData.games[currentGame];
+  const scores = raceData.players.map(p => {
+    const st = playerStates[p.id];
+    return st.pendingScore !== undefined ? st.pendingScore : st.score;
+  });
+  const minScore = Math.min(...scores);
+  const maxScore = Math.max(...scores);
+  const spread = maxScore - minScore;
+  // Add padding: at least 20% above and below, minimum range of 50 pts
+  const padding = Math.max(spread * 0.3, 30);
+  targetScoreMin = Math.max(0, minScore - padding);
+  targetScoreMax = maxScore + padding;
+  // Ensure minimum visual range
+  if (targetScoreMax - targetScoreMin < 60) {
+    const mid = (targetScoreMin + targetScoreMax) / 2;
+    targetScoreMin = Math.max(0, mid - 30);
+    targetScoreMax = mid + 30;
+  }
+}
+
+function getScoreY(score) {
+  // Map score to Y within the visible canvas area.
+  // Higher score = higher on screen (lower Y value).
+  const usableTop = TRACK_TOP_MARGIN + 20;
+  const usableBottom = canvasH - TRACK_BOTTOM_MARGIN - AVATAR_H - 20;
+  const range = scoreRangeMax - scoreRangeMin;
+  if (range <= 0) return usableBottom;
+  const normalized = (score - scoreRangeMin) / range;
+  return usableBottom - normalized * (usableBottom - usableTop);
+}
+
+function generateDecorations() {
+  // No-op for vertical layout — decorations drawn inline
+}
+
+function drawTrack() {
+  // Clear
+  ctx.fillStyle = getCSSVar('--canvas-bg');
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  if (!raceData) return;
+
+  const totalPlayers = raceData.players.length;
+
+  // Draw score grid lines (dynamic based on visible range)
+  const range = scoreRangeMax - scoreRangeMin;
+  let scoreStep;
+  if (range < 40) scoreStep = 5;
+  else if (range < 100) scoreStep = 10;
+  else if (range < 300) scoreStep = 20;
+  else if (range < 600) scoreStep = 50;
+  else scoreStep = 100;
+
+  const gridStart = Math.floor(scoreRangeMin / scoreStep) * scoreStep;
+  const gridEnd = Math.ceil(scoreRangeMax / scoreStep) * scoreStep;
+  for (let s = gridStart; s <= gridEnd; s += scoreStep) {
+    const sy = getScoreY(s);
+    if (sy < -20 || sy > canvasH + 20) continue;
+
+    const isMajor = s % (scoreStep * 2) === 0;
+    ctx.strokeStyle = getCSSVar(isMajor ? '--grid-major' : '--grid-minor');
+    ctx.setLineDash([2, 4]);
+    ctx.beginPath();
+    ctx.moveTo(0, sy);
+    ctx.lineTo(canvasW, sy);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Score label on left — bigger & bolder
+    if (isMajor) {
+      ctx.fillStyle = getCSSVar('--score-label');
+      ctx.font = 'bold 12px Courier New';
+      ctx.textAlign = 'left';
+      ctx.fillText(s + ' pts', 6, sy - 4);
+    }
+  }
+
+  // No bottom labels needed — names are inside the basketballs
+}
+
+function updateMatchupCard() {
+  const card = document.getElementById('matchupCard');
+  if (!raceData || currentGame < 0) {
+    card.classList.remove('show');
+    return;
+  }
+  const game = raceData.games[currentGame];
+  const teams = game.teams || [];
+  const displayTeams = teams.length <= 2 ? teams : teams.filter(t => {
+    const parts = game.name.split(' @ ');
+    return parts.some(p => p === t.abbrev);
+  });
+  const t1 = displayTeams[0] || teams[0];
+  const t2 = displayTeams[1] || teams[1];
+
+  if (!t1 || !t2) { card.classList.remove('show'); return; }
+
+  card.innerHTML = `
+    <div class="mc-team ${t1.winner ? 'winner' : ''}">
+      <img src="${t1.logo}" alt="${t1.abbrev}">
+      <div class="seed">#${t1.seed}</div>
+      <div class="abbrev">${t1.abbrev}</div>
+    </div>
+    <div class="mc-vs">vs</div>
+    <div class="mc-team ${t2.winner ? 'winner' : ''}">
+      <img src="${t2.logo}" alt="${t2.abbrev}">
+      <div class="seed">#${t2.seed}</div>
+      <div class="abbrev">${t2.abbrev}</div>
+    </div>
+    <div class="mc-info">
+      Game ${currentGame + 1}/63<br>
+      ${game.roundLabel}<br>
+      ${game.date}
+    </div>
+  `;
+  card.classList.add('show');
+}
+
+// ============================================================
+// AVATAR RENDERING ON TRACK
+// ============================================================
+const BLOCK_H = 22;
+const BLOCK_GAP = 6;
+
+function drawAvatars() {
+  if (!raceData) return;
+
+  raceData.players.forEach((p, playerIdx) => {
+    const st = playerStates[p.id];
+    const av = avatars[p.id];
+    if (!av) return;
+
+    const screenX = getLaneX(playerIdx, raceData.players.length);
+
+    // --- Animate jump phases ---
+    if (st.jumpPhase > 0) {
+      st.jumpTimer--;
+      if (st.jumpPhase === 1) {
+        st.offsetY = Math.min((1 - st.jumpTimer / 20) * 8, 8);
+        st.frame = 'idle';
+        if (st.jumpTimer <= 0) { st.jumpPhase = 2; st.jumpTimer = 12; }
+      } else if (st.jumpPhase === 2) {
+        const progress = 1 - (st.jumpTimer / 12);
+        const eased = 1 - Math.pow(1 - progress, 2);
+        st.offsetY = 8 - eased * (AVATAR_H * 0.7 + 8);
+        st.frame = 'boost';
+        if (st.jumpTimer <= 0) { st.jumpPhase = 3; st.jumpTimer = 15; st.blockFlash = 15; }
+      } else if (st.jumpPhase === 3) {
+        st.offsetY = -(AVATAR_H * 0.7) + Math.sin(st.jumpTimer * 1.5) * 2;
+        if (st.jumpTimer <= 0) {
+          st.jumpPhase = 4;
+          if (st.pendingScore !== undefined) {
+            st.score = st.pendingScore;
+            st.rank = st.pendingRank;
+            st.targetY = getScoreY(st.score);
+            st.pendingScore = undefined;
+            st.pendingRank = undefined;
+          }
+          if (st.jumpCorrect) {
+            st.jumpTimer = 30;
+            for (let i = 0; i < 12; i++) {
+              st.boostParticles.push({
+                x: (Math.random() - 0.5) * AVATAR_W * 1.5, y: -AVATAR_H * 0.5,
+                vx: (Math.random() - 0.5) * 5, vy: -(Math.random() * 4 + 2),
+                life: 25 + Math.random() * 15, color: getCSSVar('--correct'),
+              });
+            }
+          } else {
+            st.jumpTimer = 25; st.frame = 'stumble';
+            for (let i = 0; i < 8; i++) {
+              st.boostParticles.push({
+                x: (Math.random() - 0.5) * AVATAR_W, y: -AVATAR_H * 0.3,
+                vx: (Math.random() - 0.5) * 3, vy: Math.random() * 2 + 1,
+                life: 18 + Math.random() * 8, color: getCSSVar('--accent'),
+              });
+            }
+          }
+        }
+      } else if (st.jumpPhase === 4) {
+        const maxT = st.jumpCorrect ? 30 : 25;
+        const progress = 1 - (st.jumpTimer / maxT);
+        if (st.jumpCorrect) {
+          st.offsetY = -(AVATAR_H * 0.7) * (1 - progress) - Math.sin(progress * Math.PI) * 25;
+          st.frame = 'boost';
+        } else {
+          const fp = Math.min(progress * 1.5, 1);
+          st.offsetY = -(AVATAR_H * 0.7) * (1 - fp) + Math.abs(Math.sin(fp * Math.PI * 2.5)) * (1 - fp) * 20;
+          st.frame = 'stumble';
+        }
+        if (st.jumpTimer <= 0) { st.jumpPhase = 0; st.offsetY = 0; st.frame = 'idle'; }
+      }
+    }
+
+    // Eliminated animation: brief sad shake
+    if (st.eliminatedTimer > 0) {
+      st.eliminatedTimer--;
+      st.offsetY = Math.sin(st.eliminatedTimer * 0.6) * 3 * (st.eliminatedTimer / 30);
+      if (st.eliminatedTimer <= 0) {
+        st.offsetY = 0;
+        st.frame = 'idle';
+      }
+    }
+
+    st.y += (st.targetY - st.y) * 0.08;
+    const screenY = st.y + st.offsetY;
+    if (screenY < -AVATAR_H - 50 || screenY > canvasH + 50) return;
+
+    // --- Basketball hoop above ball ---
+    if (currentGame >= 0) {
+      const game = raceData.games[currentGame];
+      const result = game.results[p.id];
+      if (result && result.picked !== '?') {
+        const isEliminated = result.eliminated;
+        const hoopCX = screenX + AVATAR_W / 2;
+        const hoopY = screenY - BLOCK_GAP - 8; // rim Y position
+        const rimW = BALL_RADIUS + 10; // rim slightly wider than ball
+        const netH = 20;
+
+        let rimColor, hoopVisible = true;
+        if (isEliminated) {
+          // Eliminated: dim grey hoop with X
+          rimColor = isDark ? '#555' : '#999';
+        } else if (st.jumpPhase === 1 || st.jumpPhase === 2) rimColor = getCSSVar('--border');
+        else if (st.jumpPhase === 3) rimColor = st.jumpCorrect ? getCSSVar('--correct') : getCSSVar('--accent');
+        else if (st.jumpPhase === 4 && st.jumpCorrect) hoopVisible = false;
+        else if (st.jumpPhase === 4 && !st.jumpCorrect) rimColor = getCSSVar('--accent');
+        else if (result.correct === true) hoopVisible = false;
+        else if (result.correct === false && !isEliminated) rimColor = getCSSVar('--accent');
+        else rimColor = getCSSVar('--border');
+
+        if (hoopVisible) {
+          const shake = st.jumpPhase === 3 ? Math.sin(Date.now() * 0.08) * 3 : 0;
+          const cx = hoopCX + shake;
+
+          // Backboard
+          const bbW = rimW + 14;
+          const bbH = 22;
+          const bbX = cx - bbW / 2;
+          const bbY = hoopY - bbH - 2;
+          ctx.fillStyle = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+          ctx.fillRect(bbX, bbY, bbW, bbH);
+          ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)';
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(bbX, bbY, bbW, bbH);
+          // Inner square on backboard
+          ctx.strokeRect(cx - 8, bbY + 4, 16, 12);
+
+          // Pick text on backboard
+          const isRevealed = (st.jumpPhase >= 3 && st.jumpPhase <= 4) || result.correct !== null;
+          ctx.fillStyle = isRevealed ? rimColor : (isDark ? '#aaa' : '#555');
+          ctx.font = 'bold 11px Courier New';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(result.picked, cx, bbY + bbH / 2);
+          ctx.textBaseline = 'alphabetic';
+          ctx.textAlign = 'left';
+
+          // Rim (ellipse viewed from slight angle)
+          ctx.beginPath();
+          ctx.ellipse(cx, hoopY, rimW / 2, 5, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = rimColor;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          // Rim fill (slight transparency)
+          ctx.beginPath();
+          ctx.ellipse(cx, hoopY, rimW / 2, 5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = rimColor + '30';
+          ctx.fill();
+
+          // Net lines (simple V-shape strings)
+          ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.15)';
+          ctx.lineWidth = 1;
+          const netPts = 5;
+          for (let i = 0; i <= netPts; i++) {
+            const t = i / netPts;
+            const topX = cx - rimW / 2 + t * rimW;
+            // Net converges toward center bottom
+            const botX = cx - rimW / 4 + t * rimW / 2;
+            const botY = hoopY + netH;
+            ctx.beginPath();
+            ctx.moveTo(topX, hoopY + 3);
+            ctx.quadraticCurveTo((topX + botX) / 2, hoopY + netH * 0.6, botX, botY);
+            ctx.stroke();
+          }
+          // Horizontal net lines
+          for (let row = 1; row <= 2; row++) {
+            const ry = hoopY + 3 + row * (netH / 3);
+            const narrowing = row * 0.15;
+            const lx = cx - (rimW / 2) * (1 - narrowing);
+            const rx = cx + (rimW / 2) * (1 - narrowing);
+            ctx.beginPath();
+            ctx.moveTo(lx, ry);
+            ctx.lineTo(rx, ry);
+            ctx.stroke();
+          }
+
+          // Rim shake on impact
+          if (st.jumpPhase === 3 && !st.jumpCorrect) {
+            ctx.beginPath();
+            ctx.ellipse(cx, hoopY, rimW / 2 + 3, 7, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = getCSSVar('--accent') + '60';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+
+          // X mark over hoop for eliminated picks
+          if (isEliminated) {
+            ctx.globalAlpha = 0.7;
+            ctx.strokeStyle = getCSSVar('--accent');
+            ctx.lineWidth = 3;
+            const xSize = 12;
+            ctx.beginPath();
+            ctx.moveTo(cx - xSize, hoopY - xSize);
+            ctx.lineTo(cx + xSize, hoopY + xSize);
+            ctx.moveTo(cx + xSize, hoopY - xSize);
+            ctx.lineTo(cx - xSize, hoopY + xSize);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+    }
+
+    // --- Draw basketball ---
+    // Dim the ball if eliminated
+    const gameResult = currentGame >= 0 ? raceData.games[currentGame].results[p.id] : null;
+    if (gameResult && gameResult.eliminated && st.eliminatedTimer > 0) {
+      ctx.globalAlpha = 0.45;
+    }
+    let scaleX = 1, scaleY = 1;
+    if (st.jumpPhase === 1) { scaleX = 1.12; scaleY = 0.88; }
+    else if (st.jumpPhase === 2) { scaleX = 0.88; scaleY = 1.15; }
+    else if (st.frame === 'stumble' && st.jumpPhase >= 3) { scaleX = 1.15; scaleY = 0.85; }
+
+    ctx.save();
+    ctx.translate(screenX + AVATAR_W / 2, screenY + AVATAR_H / 2);
+    ctx.scale(scaleX, scaleY);
+    ctx.translate(-(screenX + AVATAR_W / 2), -(screenY + AVATAR_H / 2));
+    const ballLabel = isPublic ? (p.initials || p.name) : p.name;
+    drawBall(screenX, screenY, BALL_RADIUS, ballLabel, av, 0);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+
+    // Score below ball
+    ctx.fillStyle = getCSSVar('--accent');
+    ctx.font = 'bold 11px Courier New';
+    ctx.textAlign = 'center';
+    ctx.fillText(st.score, screenX + AVATAR_W / 2, screenY + AVATAR_H + 18);
+    ctx.textAlign = 'left';
+
+    // Particles
+    st.boostParticles = st.boostParticles.filter(bp => {
+      bp.life--; bp.x += bp.vx; bp.y += bp.vy; bp.vy += 0.15;
+      if (bp.life <= 0) return false;
+      ctx.globalAlpha = bp.life / 25;
+      ctx.fillStyle = bp.color || getCSSVar('--accent');
+      ctx.fillRect(screenX + AVATAR_W / 2 + bp.x, screenY + bp.y, 4, 4);
+      ctx.globalAlpha = 1;
+      return true;
+    });
+
+    // Dizzy stars
+    if (st.frame === 'stumble' && st.jumpPhase >= 3) {
+      const sa = Date.now() / 200;
+      for (let i = 0; i < 3; i++) {
+        const a = sa + (i * Math.PI * 2 / 3);
+        ctx.fillStyle = '#FFD700';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText('*', screenX + AVATAR_W / 2 + Math.cos(a) * (BALL_RADIUS + 6), screenY + Math.sin(a) * 8);
+      }
+    }
+  });
+}
+
+// ============================================================
+// GAME STATE MANAGEMENT
+// ============================================================
+function advanceToGame(targetGame) {
+  if (!raceData) return;
+  targetGame = Math.max(-1, Math.min(targetGame, raceData.games.length - 1));
+
+  const prevGame = currentGame;
+  currentGame = targetGame;
+
+  if (currentGame < 0) {
+    // Reset all to start
+    targetScoreMin = 0;
+    targetScoreMax = 60;
+    scoreRangeMin = 0;
+    scoreRangeMax = 60;
+    const startY = getScoreY(0);
+    raceData.players.forEach(p => {
+      const st = playerStates[p.id];
+      st.score = 0;
+      st.rank = 1;
+      st.prevRank = 1;
+      st.targetY = startY;
+      st.y = startY;
+      st.frame = 'idle';
+      st.jumpPhase = 0;
+      st.offsetY = 0;
+    });
+    updateUI();
+    updateMatchupCard();
+    return;
+  }
+
+  const game = raceData.games[currentGame];
+
+  raceData.players.forEach(p => {
+    const result = game.results[p.id];
+    const st = playerStates[p.id];
+    if (!result) return;
+
+    const oldRank = st.rank;
+    st.prevRank = oldRank;
+
+    // Trigger jump animation when stepping forward on completed games
+    if (currentGame > prevGame && game.status === 'COMPLETE') {
+      // Don't update score/position yet — defer to phase 4
+      st.pendingScore = result.cumulative_score;
+      st.pendingRank = result.rank;
+    } else {
+      // Non-animated: update immediately
+      st.score = result.cumulative_score;
+      st.rank = result.rank;
+      st.targetY = getScoreY(st.score);
+    }
+
+    if (currentGame > prevGame && game.status === 'COMPLETE') {
+      if (result.eliminated) {
+        // Team was eliminated in a prior round — no jump, just sad
+        st.jumpPhase = 0;
+        st.frame = 'stumble';
+        st.offsetY = 0;
+        // Brief shake then idle
+        st.eliminatedTimer = 30;
+      } else {
+        st.jumpPhase = 1;
+        st.jumpTimer = 20;
+        st.jumpCorrect = result.correct === true;
+        st.blockFlash = 0;
+        st.offsetY = 0;
+        st.frame = 'idle';
+      }
+      st.eliminatedTimer = result.eliminated ? 30 : 0;
+    } else if (currentGame > prevGame && game.status !== 'COMPLETE') {
+      st.jumpPhase = 0;
+      st.frame = 'idle';
+      st.offsetY = 0;
+      st.eliminatedTimer = 0;
+    }
+  });
+
+  // Update dynamic score range to zoom into current spread
+  updateScoreRange();
+
+  updateUI();
+  updateMatchupCard();
+  showToast(game);
+}
+
+function showToast(game) {
+  if (game.status !== 'COMPLETE') return;
+  const toast = document.getElementById('toast');
+  // Find who got it right
+  const rightCount = raceData.players.filter(p => game.results[p.id]?.correct === true).length;
+  const wrongCount = raceData.players.filter(p => game.results[p.id]?.correct === false).length;
+
+  toast.innerHTML = `<strong>${game.name}</strong> &mdash; ${game.roundLabel}<br>` +
+    `<span style="color:#27AE60">${rightCount} correct</span> &middot; <span style="color:#FF007A">${wrongCount} wrong</span>`;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+function updateUI() {
+  const gameNum = document.getElementById('gameNum');
+  const gameTotal = document.getElementById('gameTotal');
+  const roundLabel = document.getElementById('roundLabel');
+  const gameInfo = document.getElementById('gameInfo');
+
+  gameNum.textContent = currentGame + 1;
+  gameTotal.textContent = raceData ? raceData.games.length : 63;
+
+  if (currentGame >= 0 && raceData) {
+    const g = raceData.games[currentGame];
+    roundLabel.textContent = g.roundLabel;
+    gameInfo.innerHTML =
+      `<div class="round-label">${g.roundLabel}</div>` +
+      `<div class="game-name">${g.name}</div>` +
+      `<div class="game-date">${g.date} &mdash; ${g.status}</div>`;
+  } else {
+    roundLabel.textContent = '--';
+    gameInfo.innerHTML = '<div class="game-name">Press play to start the race!</div>';
+  }
+
+  updateLeaderboard();
+}
+
+function updateLeaderboard() {
+  const lb = document.getElementById('leaderboard');
+  if (!raceData) return;
+
+  const sorted = raceData.players.slice().sort((a, b) => {
+    const ra = playerStates[a.id]?.rank || 99;
+    const rb = playerStates[b.id]?.rank || 99;
+    if (ra !== rb) return ra - rb;
+    return (playerStates[b.id]?.score || 0) - (playerStates[a.id]?.score || 0);
+  });
+
+  const game = currentGame >= 0 ? raceData.games[currentGame] : null;
+
+  lb.innerHTML = sorted.map(p => {
+    const st = playerStates[p.id];
+    const av = avatars[p.id];
+    const rankChange = st.prevRank - st.rank;
+    let rankChangeHtml = '<span class="lb-rank-change"></span>';
+    let highlightClass = '';
+    if (rankChange > 0) {
+      rankChangeHtml = `<span class="lb-rank-change up">+${rankChange}</span>`;
+      highlightClass = 'highlight-up';
+    } else if (rankChange < 0) {
+      rankChangeHtml = `<span class="lb-rank-change down">${rankChange}</span>`;
+      highlightClass = 'highlight-down';
+    }
+
+    let pickHtml = '';
+    if (game && game.results[p.id]) {
+      const r = game.results[p.id];
+      const cls = r.correct === true ? 'correct' : r.correct === false ? 'incorrect' : 'undecided';
+      pickHtml = `<span class="lb-pick ${cls}">${r.picked}</span>`;
+    }
+
+    // Create tiny avatar data URL
+    const avatarUrl = av ? av.small.toDataURL() : '';
+
+    return `<div class="leaderboard-entry ${highlightClass}">
+      <span class="lb-rank">${st.rank}</span>
+      ${avatarUrl ? `<img class="lb-avatar" src="${avatarUrl}">` : ''}
+      <span class="lb-name">${isPublic ? (p.initials || p.name) : p.name}</span>
+      ${pickHtml}
+      <span class="lb-score">${st.score}</span>
+      ${rankChangeHtml}
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ANIMATION LOOP
+// ============================================================
+function render() {
+  if (!canvasEl || !ctx) return;
+
+  // Lerp the dynamic score range
+  scoreRangeMin += (targetScoreMin - scoreRangeMin) * 0.06;
+  scoreRangeMax += (targetScoreMax - scoreRangeMax) * 0.06;
+
+  // Recompute target Y for all players based on current (lerping) range
+  if (raceData) {
+    raceData.players.forEach(p => {
+      const st = playerStates[p.id];
+      // Only update targetY if not mid-jump (phases 1-3 use offsets)
+      if (st.jumpPhase === 0 || st.jumpPhase === 4) {
+        st.targetY = getScoreY(st.score);
+      }
+    });
+  }
+
+  drawTrack();
+  drawAvatars();
+
+  requestAnimationFrame(render);
+}
+
+function resizeCanvas() {
+  const container = document.querySelector('.track-container');
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  const dpr = window.devicePixelRatio || 1;
+  canvasEl.width = w * dpr;
+  canvasEl.height = h * dpr;
+  canvasEl.style.width = w + 'px';
+  canvasEl.style.height = h + 'px';
+  canvasW = w;
+  canvasH = h;
+  ctx = canvasEl.getContext('2d');
+  ctx.scale(dpr, dpr);
+  generateDecorations();
+}
+
+// ============================================================
+// CONTROLS
+// ============================================================
+function togglePlay() {
+  if (!raceData) return;
+  playing = !playing;
+  const btn = document.getElementById('playPause');
+  if (playing) {
+    btn.innerHTML = '&#9646;&#9646;';
+    btn.classList.add('active');
+    // Immediately advance one step, then set interval
+    if (currentGame < raceData.games.length - 1) {
+      advanceToGame(currentGame + 1);
+    }
+    playInterval = setInterval(() => {
+      if (currentGame >= raceData.games.length - 1) {
+        togglePlay();
+        return;
+      }
+      advanceToGame(currentGame + 1);
+    }, tickSpeed);
+  } else {
+    btn.innerHTML = '&#9654;';
+    btn.classList.remove('active');
+    clearInterval(playInterval);
+    playInterval = null;
+  }
+}
+
+function updateSpeed() {
+  const val = document.getElementById('speedSlider').value;
+  // Slider 1 = slow (3500ms), 10 = fast (300ms)
+  tickSpeed = 3500 - (val - 1) * 355;
+  if (playing) {
+    clearInterval(playInterval);
+    playInterval = setInterval(() => {
+      if (currentGame >= raceData.games.length - 1) {
+        togglePlay();
+        return;
+      }
+      advanceToGame(currentGame + 1);
+    }, tickSpeed);
+  }
+}
+
+// ============================================================
+// DATA LOADING
+// ============================================================
+async function loadRace(tournament) {
+  currentTournament = tournament;
+  const cacheBust = '?t=' + Date.now();
+  const file = (tournament === 'women' ? 'race_data_women.json' : 'race_data_men.json') + cacheBust;
+  const resp = await fetch(file);
+  raceData = await resp.json();
+
+  document.getElementById('title').textContent = raceData.title;
+  document.getElementById('toggleBtn').textContent = tournament === 'men' ? "WOMEN'S" : "MEN'S";
+
+  // Sort players alphabetically for consistent lane ordering
+  raceData.players.sort((a, b) => a.name.localeCompare(b.name));
+
+  // Generate avatars
+  avatars = {};
+  raceData.players.forEach(p => {
+    avatars[p.id] = generateAvatar(p.id);
+  });
+
+  // Reset state
+  if (playing) togglePlay();
+  currentGame = -1;
+  targetScoreMin = 0;
+  targetScoreMax = 60;
+  scoreRangeMin = 0;
+  scoreRangeMax = 60;
+
+  initPlayerStates();
+  // Place everyone at bottom (score = 0)
+  const startY = getScoreY(0);
+  raceData.players.forEach(p => {
+    const st = playerStates[p.id];
+    st.y = startY;
+    st.targetY = startY;
+  });
+
+  generateDecorations();
+  preloadLogos();
+  updateUI();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', async () => {
+  // Check company access before anything renders
+  const companyAuth = await checkCompanyAccess();
+  if (companyAuth) isPublic = false;
+
+  canvasEl = document.getElementById('raceCanvas');
+  refreshThemeColors();
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  document.getElementById('playPause').addEventListener('click', togglePlay);
+  document.getElementById('stepFwd').addEventListener('click', () => {
+    if (raceData && currentGame < raceData.games.length - 1) advanceToGame(currentGame + 1);
+  });
+  document.getElementById('stepBack').addEventListener('click', () => {
+    advanceToGame(currentGame - 1);
+  });
+  document.getElementById('speedSlider').addEventListener('input', updateSpeed);
+  document.getElementById('toggleBtn').addEventListener('click', () => {
+    loadRace(currentTournament === 'men' ? 'women' : 'men');
+  });
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    isDark = !isDark;
+    document.body.classList.toggle('light', !isDark);
+    // Need a frame for CSS to apply before reading vars
+    requestAnimationFrame(refreshThemeColors);
+  });
+
+  // Keyboard controls
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+    if (e.code === 'ArrowRight') advanceToGame(currentGame + 1);
+    if (e.code === 'ArrowLeft') advanceToGame(currentGame - 1);
+  });
+
+  loadRace('men').then(() => {
+    console.log('Race loaded:', raceData.players.length, 'players,', raceData.games.length, 'games');
+    console.log('Canvas:', canvasW, 'x', canvasH);
+    render();
+  });
+});
+</script>
+</body>
+</html>
