@@ -3,6 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 const projects = [
   {
+    title: 'UniMadness Bracket Race',
+    description: 'An interactive basketball-themed visualization of our March Madness bracket challenge. Watch players race up the leaderboard as game results come in, with bouncing basketballs, hoop animations, and real-time score tracking.',
+    url: '/march-madness/',
+    tags: ['Visualization', 'March Madness', 'Interactive'],
+  },
+  {
     title: 'DeFi Workshop',
     description: 'A seminar series exploring decentralized finance concepts, protocols, and research. Co-organized at UC Santa Barbara to bridge academic research with DeFi practitioners.',
     url: 'https://ucsbdefi.wixsite.com/seminar',
@@ -35,14 +41,16 @@ const projects = [
       {projects.map((project) => (
         <article class="group border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
           {project.url ? (
-            <a href={project.url} target="_blank" rel="noopener noreferrer" class="block">
+            <a href={project.url} {...(project.url.startsWith('/') ? {} : { target: '_blank', rel: 'noopener noreferrer' })} class="block">
               <div class="flex items-start justify-between mb-2">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {project.title}
                 </h2>
-                <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
+                {!project.url.startsWith('/') && (
+                  <svg class="w-5 h-5 text-gray-400 dark:text-gray-500 mt-1 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                )}
               </div>
               <p class="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
                 {project.description}
