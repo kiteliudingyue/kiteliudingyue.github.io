@@ -145,17 +145,12 @@
   }
   .toast.show { opacity: 1; }
 
-  /* Winner banner — shown when race finishes */
+  /* Podium — shown when race finishes */
   .winner-banner {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.4);
-    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-    color: #1a1a1a;
-    padding: 22px 44px;
-    border-radius: 14px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 80px rgba(255,215,0,0.55);
     z-index: 50;
     opacity: 0;
     pointer-events: none;
@@ -164,20 +159,73 @@
     font-family: 'Courier New', monospace;
   }
   .winner-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  .winner-banner .wb-crown { font-size: 36px; line-height: 1; margin-bottom: 4px; }
-  .winner-banner .wb-label {
-    font-size: 12px;
-    letter-spacing: 5px;
+  .podium-title {
+    color: #FFD700;
+    font-size: 15px;
+    letter-spacing: 6px;
     font-weight: bold;
-    opacity: 0.75;
-    margin-bottom: 4px;
+    margin-bottom: 14px;
+    text-shadow: 0 2px 14px rgba(255,215,0,0.7), 0 0 30px rgba(255,215,0,0.4);
   }
-  .winner-banner .wb-name {
-    font-size: 26px;
+  .podium {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    filter: drop-shadow(0 12px 30px rgba(0,0,0,0.55));
+  }
+  .podium-spot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 105px;
+  }
+  .podium-info {
+    background: var(--bg3);
+    border: 2px solid currentColor;
+    border-bottom: none;
+    padding: 8px 10px 10px;
+    border-radius: 6px 6px 0 0;
+    width: 100%;
+    color: var(--text);
+  }
+  .podium-medal { font-size: 28px; line-height: 1; }
+  .podium-name {
+    font-size: 14px;
     font-weight: bold;
-    letter-spacing: 1px;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
   }
-  .winner-banner .wb-score { font-size: 13px; margin-top: 6px; opacity: 0.8; }
+  .podium-score { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+  .podium-block {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+    font-weight: bold;
+    font-size: 22px;
+    letter-spacing: 2px;
+    padding: 10px 0 6px;
+    font-family: 'Courier New', monospace;
+    border: 2px solid currentColor;
+    border-bottom: none;
+  }
+  .podium-spot.first { color: #FFD700; }
+  .podium-spot.first .podium-block {
+    background: linear-gradient(180deg, #FFD700 0%, #B8860B 100%);
+    height: 90px;
+    color: #3a2900;
+  }
+  .podium-spot.second { color: #C0C0C0; }
+  .podium-spot.second .podium-block {
+    background: linear-gradient(180deg, #E5E5E5 0%, #7d7d7d 100%);
+    height: 65px;
+    color: #2a2a2a;
+  }
+  .podium-spot.third { color: #CD7F32; }
+  .podium-spot.third .podium-block {
+    background: linear-gradient(180deg, #E8A06A 0%, #8B5A2B 100%);
+    height: 45px;
+    color: #2e1500;
+  }
 
   .sidebar {
     width: 280px;
@@ -806,16 +854,33 @@ function showWinnerBanner() {
   const sorted = raceData.players.slice().sort((a, b) =>
     (playerStates[a.id]?.rank || 99) - (playerStates[b.id]?.rank || 99)
   );
-  const winner = sorted[0];
-  if (!winner) return;
-  const st = playerStates[winner.id];
-  const displayName = isPublic ? (winner.initials || winner.name) : winner.name;
+  const top3 = sorted.slice(0, 3);
+  if (top3.length === 0) return;
 
+  const renderSpot = (player, place, medal, posClass) => {
+    if (!player) return '';
+    const st = playerStates[player.id];
+    const displayName = isPublic ? (player.initials || player.name) : player.name;
+    return `
+      <div class="podium-spot ${posClass}">
+        <div class="podium-info">
+          <div class="podium-medal">${medal}</div>
+          <div class="podium-name">${displayName}</div>
+          <div class="podium-score">${st.score} pts</div>
+        </div>
+        <div class="podium-block">${place}</div>
+      </div>
+    `;
+  };
+
+  // Classic 2-1-3 visual order, with the tallest block in the middle.
   banner.innerHTML = `
-    <div class="wb-crown">&#x1F451;</div>
-    <div class="wb-label">CHAMPION</div>
-    <div class="wb-name">${displayName}</div>
-    <div class="wb-score">${st.score} pts</div>
+    <div class="podium-title">FINAL STANDINGS</div>
+    <div class="podium">
+      ${renderSpot(top3[1], '2', '&#x1F948;', 'second')}
+      ${renderSpot(top3[0], '1', '&#x1F947;', 'first')}
+      ${renderSpot(top3[2], '3', '&#x1F949;', 'third')}
+    </div>
   `;
   banner.classList.add('show');
 }
