@@ -145,6 +145,40 @@
   }
   .toast.show { opacity: 1; }
 
+  /* Winner banner — shown when race finishes */
+  .winner-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.4);
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #1a1a1a;
+    padding: 22px 44px;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 80px rgba(255,215,0,0.55);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    text-align: center;
+    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-family: 'Courier New', monospace;
+  }
+  .winner-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .winner-banner .wb-crown { font-size: 36px; line-height: 1; margin-bottom: 4px; }
+  .winner-banner .wb-label {
+    font-size: 12px;
+    letter-spacing: 5px;
+    font-weight: bold;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+  .winner-banner .wb-name {
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .winner-banner .wb-score { font-size: 13px; margin-top: 6px; opacity: 0.8; }
+
   .sidebar {
     width: 280px;
     background: var(--bg2);
@@ -183,6 +217,14 @@
   }
   .leaderboard-entry.highlight-up { background: rgba(39, 174, 96, 0.2); }
   .leaderboard-entry.highlight-down { background: rgba(255, 0, 122, 0.2); }
+  .leaderboard-entry.first-place {
+    background: linear-gradient(90deg, rgba(255,215,0,0.22), var(--bg3));
+    border-left: 3px solid #FFD700;
+    box-shadow: 0 0 10px rgba(255,215,0,0.25);
+  }
+  .leaderboard-entry.first-place .lb-rank { color: #FFD700; }
+  .leaderboard-entry.first-place .lb-name { color: #FFD700; font-weight: bold; }
+  .lb-crown { margin-right: 4px; font-size: 13px; line-height: 1; }
   .lb-rank { width: 24px; font-weight: bold; color: var(--text-dim); }
   .lb-avatar { width: 20px; height: 20px; margin-right: 8px; image-rendering: pixelated; }
   .lb-name { flex: 1; }
@@ -249,6 +291,7 @@
     <canvas id="raceCanvas"></canvas>
     <div class="matchup-card" id="matchupCard"></div>
     <div class="toast" id="toast"></div>
+    <div class="winner-banner" id="winnerBanner"></div>
   </div>
   <div class="sidebar">
     <h2>STANDINGS</h2>
@@ -489,6 +532,10 @@ let currentTournament = 'men';
 // Animation state per player
 let playerStates = {};
 
+// Confetti particles for finish-line celebration
+let confettiParticles = [];
+let celebrationActive = false;
+
 function initPlayerStates() {
   playerStates = {};
   if (!raceData) return;
@@ -671,6 +718,126 @@ function updateMatchupCard() {
 // ============================================================
 const BLOCK_H = 22;
 const BLOCK_GAP = 6;
+
+// Draw a small pixel-art-ish crown centered at (cx, cy)
+function drawCrown(cx, cy, w) {
+  const h = w * 0.7;
+  const x = cx - w / 2;
+  const y = cy - h;
+
+  ctx.fillStyle = '#FFD700';
+  ctx.strokeStyle = '#8B6914';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y + h);
+  ctx.lineTo(x + w, y + h);
+  ctx.lineTo(x + w * 0.85, y + h * 0.45);
+  ctx.lineTo(x + w * 0.7, y + h * 0.65);
+  ctx.lineTo(x + w * 0.5, y + h * 0.2);
+  ctx.lineTo(x + w * 0.3, y + h * 0.65);
+  ctx.lineTo(x + w * 0.15, y + h * 0.45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#FF3366';
+  ctx.beginPath(); ctx.arc(x + w * 0.15, y + h * 0.4, 1.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#3399FF';
+  ctx.beginPath(); ctx.arc(x + w * 0.5, y + h * 0.18, 1.6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#33CC66';
+  ctx.beginPath(); ctx.arc(x + w * 0.85, y + h * 0.4, 1.4, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(x + w * 0.45, y + h * 0.7, w * 0.1, h * 0.2);
+}
+
+// ============================================================
+// CELEBRATION (finish-line confetti + winner banner)
+// ============================================================
+const CONFETTI_COLORS = ['#FFD700', '#FF007A', '#27AE60', '#3399FF', '#FF6B35', '#FFFFFF'];
+
+function spawnConfettiBurst(count) {
+  for (let i = 0; i < count; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvasW,
+      y: -10 - Math.random() * 40,
+      vx: (Math.random() - 0.5) * 3,
+      vy: Math.random() * 2 + 1,
+      size: 4 + Math.random() * 5,
+      rot: Math.random() * Math.PI * 2,
+      vrot: (Math.random() - 0.5) * 0.25,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+      life: 220 + Math.random() * 80,
+      shape: Math.random() < 0.5 ? 'rect' : 'strip',
+    });
+  }
+}
+
+function drawConfetti() {
+  if (confettiParticles.length === 0) return;
+  confettiParticles = confettiParticles.filter(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.06;
+    p.vx *= 0.995;
+    p.rot += p.vrot;
+    p.life--;
+    if (p.life <= 0 || p.y > canvasH + 30) return false;
+
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.fillStyle = p.color;
+    ctx.globalAlpha = Math.min(1, p.life / 60);
+    if (p.shape === 'rect') {
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+    } else {
+      ctx.fillRect(-p.size / 2, -1, p.size, 2);
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    return true;
+  });
+}
+
+function showWinnerBanner() {
+  if (!raceData) return;
+  const banner = document.getElementById('winnerBanner');
+  const sorted = raceData.players.slice().sort((a, b) =>
+    (playerStates[a.id]?.rank || 99) - (playerStates[b.id]?.rank || 99)
+  );
+  const winner = sorted[0];
+  if (!winner) return;
+  const st = playerStates[winner.id];
+  const displayName = isPublic ? (winner.initials || winner.name) : winner.name;
+
+  banner.innerHTML = `
+    <div class="wb-crown">&#x1F451;</div>
+    <div class="wb-label">CHAMPION</div>
+    <div class="wb-name">${displayName}</div>
+    <div class="wb-score">${st.score} pts</div>
+  `;
+  banner.classList.add('show');
+}
+
+function hideWinnerBanner() {
+  document.getElementById('winnerBanner').classList.remove('show');
+}
+
+function triggerCelebration() {
+  if (celebrationActive) return;
+  celebrationActive = true;
+  spawnConfettiBurst(120);
+  setTimeout(() => { if (celebrationActive) spawnConfettiBurst(80); }, 600);
+  setTimeout(() => { if (celebrationActive) spawnConfettiBurst(80); }, 1300);
+  setTimeout(() => { if (celebrationActive) spawnConfettiBurst(60); }, 2200);
+  setTimeout(showWinnerBanner, 350);
+}
+
+function endCelebration() {
+  celebrationActive = false;
+  hideWinnerBanner();
+}
 
 function drawAvatars() {
   if (!raceData) return;
@@ -898,6 +1065,14 @@ function drawAvatars() {
     ctx.fillText(st.score, screenX + AVATAR_W / 2, screenY + AVATAR_H + 18);
     ctx.textAlign = 'left';
 
+    // Crown above the rank-1 player (only once race has started)
+    if (currentGame >= 0 && st.rank === 1 && st.jumpPhase === 0) {
+      const cx = screenX + AVATAR_W / 2;
+      const cy = screenY - 12;
+      const bob = Math.sin(Date.now() * 0.004) * 1.5;
+      drawCrown(cx, cy + bob, 14);
+    }
+
     // Particles
     st.boostParticles = st.boostParticles.filter(bp => {
       bp.life--; bp.x += bp.vx; bp.y += bp.vy; bp.vy += 0.15;
@@ -934,6 +1109,7 @@ function advanceToGame(targetGame) {
 
   if (currentGame < 0) {
     // Reset all to start
+    if (celebrationActive) endCelebration();
     targetScoreMin = 0;
     targetScoreMax = 60;
     scoreRangeMin = 0;
@@ -1008,6 +1184,14 @@ function advanceToGame(targetGame) {
   updateUI();
   updateMatchupCard();
   showToast(game);
+
+  // Finish-line celebration: triggered when we reach the final game and it's complete.
+  const isFinalGame = currentGame === raceData.games.length - 1;
+  if (isFinalGame && game.status === 'COMPLETE' && !celebrationActive) {
+    setTimeout(triggerCelebration, 1400);
+  } else if (!isFinalGame && celebrationActive) {
+    endCelebration();
+  }
 }
 
 function showToast(game) {
@@ -1061,7 +1245,7 @@ function updateLeaderboard() {
 
   const game = currentGame >= 0 ? raceData.games[currentGame] : null;
 
-  lb.innerHTML = sorted.map(p => {
+  lb.innerHTML = sorted.map((p, idx) => {
     const st = playerStates[p.id];
     const av = avatars[p.id];
     const rankChange = st.prevRank - st.rank;
@@ -1075,6 +1259,10 @@ function updateLeaderboard() {
       highlightClass = 'highlight-down';
     }
 
+    const isFirst = idx === 0 && currentGame >= 0 && st.rank === 1;
+    const firstClass = isFirst ? 'first-place' : '';
+    const crownHtml = isFirst ? '<span class="lb-crown">&#x1F451;</span>' : '';
+
     let pickHtml = '';
     if (game && game.results[p.id]) {
       const r = game.results[p.id];
@@ -1085,8 +1273,9 @@ function updateLeaderboard() {
     // Create tiny avatar data URL
     const avatarUrl = av ? av.small.toDataURL() : '';
 
-    return `<div class="leaderboard-entry ${highlightClass}">
+    return `<div class="leaderboard-entry ${highlightClass} ${firstClass}">
       <span class="lb-rank">${st.rank}</span>
+      ${crownHtml}
       ${avatarUrl ? `<img class="lb-avatar" src="${avatarUrl}">` : ''}
       <span class="lb-name">${isPublic ? (p.initials || p.name) : p.name}</span>
       ${pickHtml}
@@ -1119,6 +1308,7 @@ function render() {
 
   drawTrack();
   drawAvatars();
+  drawConfetti();
 
   requestAnimationFrame(render);
 }
@@ -1208,6 +1398,8 @@ async function loadRace(tournament) {
 
   // Reset state
   if (playing) togglePlay();
+  if (celebrationActive) endCelebration();
+  confettiParticles = [];
   currentGame = -1;
   targetScoreMin = 0;
   targetScoreMax = 60;
