@@ -12,5 +12,6 @@ authors:
 hook: "Order matters most. / Fairness or stability? / Both, if you're clever."
 pdfUrl: "https://arxiv.org/pdf/2408.02634"
 status: "Working Paper"
-sortOrder: 1
+featured: true
+sortOrder: 2
 ---
