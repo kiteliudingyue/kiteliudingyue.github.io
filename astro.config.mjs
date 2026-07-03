@@ -9,7 +9,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
-  site: 'https://kiteliudingyue.github.io',
+  site: 'https://kiteliudingyue.com',
   integrations: [
     react(),
     mdx(),
