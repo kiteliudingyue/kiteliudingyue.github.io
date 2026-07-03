@@ -1,0 +1,35 @@
+<div class="clouds" aria-hidden="true">
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+</div>
+
+<style>
+  .clouds {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .cloud {
+    position: absolute;
+    border-radius: 9999px;
+    background: rgb(var(--color-sky) / 0.3);
+    filter: blur(18px);
+  }
+  :global(.dark) .cloud {
+    background: rgb(var(--color-sky) / 0.07);
+  }
+  .cloud-1 { width: 180px; height: 44px; top: 16%; animation: cloud-drift 75s linear infinite; animation-delay: -15s; }
+  .cloud-2 { width: 120px; height: 32px; top: 58%; animation: cloud-drift 95s linear infinite; animation-delay: -50s; }
+  .cloud-3 { width: 240px; height: 56px; top: 34%; animation: cloud-drift 120s linear infinite; animation-delay: -85s; }
+
+  @keyframes cloud-drift {
+    from { transform: translateX(-280px); }
+    to { transform: translateX(calc(100vw + 280px)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cloud { animation: none; }
+  }
+</style>

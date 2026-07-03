@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import AmbientClouds from '../components/AmbientClouds.astro';
 
 const cards = [
   {
@@ -21,11 +22,12 @@ const cards = [
 ---
 
 <BaseLayout title="Dingyue (Kite) Liu - Senior Research Scientist">
-	<section class="hero-section container mx-auto px-4 pt-20 pb-12 md:pt-28 md:pb-16">
-		<div class="max-w-4xl mx-auto text-center">
+	<section class="hero-section relative overflow-hidden container mx-auto px-4 pt-20 pb-12 md:pt-28 md:pb-16">
+		<AmbientClouds />
+		<div class="relative max-w-4xl mx-auto text-center">
 			<h1 class="hero-title text-4xl md:text-6xl lg:text-7xl font-bold mb-6">
 				<span class="block text-gray-900 dark:text-white">Hi, I'm</span>
-				<span class="block gradient-text">Dingyue (Kite) Liu</span>
+				<span class="block gradient-text wonky">Dingyue (Kite) Liu</span>
 			</h1>
 
 			<p class="hero-subtitle text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-8 animate-fade-in-up">
@@ -85,7 +87,8 @@ const cards = [
 
 <style>
 	.gradient-text {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(120deg, #2563eb 0%, #7c6af0 45%, #f4745e 100%);
+		background-size: 200% 200%;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
@@ -94,6 +97,10 @@ const cards = [
 		   background-clip:text — add room below the baseline. */
 		line-height: 1.15;
 		padding-bottom: 0.12em;
+	}
+
+	:global(.dark) .gradient-text {
+		background-image: linear-gradient(120deg, #60a5fa 0%, #8b7cf7 45%, #fb8f7d 100%);
 	}
 
 	@keyframes gradient-shift {
