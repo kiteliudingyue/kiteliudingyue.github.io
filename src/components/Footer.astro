@@ -10,9 +10,22 @@ const socialLinks = [
 <footer class="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
   <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-      <p class="text-sm text-gray-600 dark:text-gray-400">
-        © {currentYear} Dingyue (Kite) Liu. All rights reserved.
-      </p>
+      <div class="flex items-center gap-2">
+        <button
+          id="kite-footer-toggle"
+          class="kite-footer-toggle"
+          aria-label="Toggle the kite cursor companion"
+          title="Toggle the kite companion"
+        >
+          <svg width="16" height="20" viewBox="0 0 40 54" fill="none" aria-hidden="true">
+            <path d="M20 2 L36 20 L20 40 L4 20 Z" fill="rgb(var(--color-primary))" />
+            <path d="M20 40 C 15 45, 26 47, 21 53" stroke="rgb(var(--color-coral))" stroke-width="3" fill="none" stroke-linecap="round" />
+          </svg>
+        </button>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          © {currentYear} Dingyue (Kite) Liu. All rights reserved.
+        </p>
+      </div>
 
       <div class="flex items-center gap-6">
         {socialLinks.map((link) => (
@@ -44,3 +57,22 @@ const socialLinks = [
     </div>
   </div>
 </footer>
+
+<style>
+  .kite-footer-toggle {
+    background: none;
+    border: 0;
+    padding: 0.25rem;
+    cursor: pointer;
+    line-height: 0;
+  }
+  .kite-footer-toggle svg {
+    animation: kite-bob 5s ease-in-out infinite;
+  }
+</style>
+
+<script>
+  document.getElementById('kite-footer-toggle')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('kite:toggle'));
+  });
+</script>

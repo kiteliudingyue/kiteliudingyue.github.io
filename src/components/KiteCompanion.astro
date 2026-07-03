@@ -1,0 +1,154 @@
+<div id="kite-companion" aria-hidden="true" hidden>
+  <svg class="kc-string-svg" width="100%" height="100%">
+    <path class="kc-string" d="" fill="none"></path>
+  </svg>
+  <button class="kc-kite" tabindex="-1" title="Click to send the kite away">
+    <svg width="34" height="46" viewBox="0 0 40 54" fill="none">
+      <path class="kc-sail" d="M20 2 L36 20 L20 40 L4 20 Z" />
+      <path d="M20 2 L20 40 M4 20 L36 20" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" />
+      <path class="kc-tail" d="M20 40 C 15 45, 26 47, 21 53" stroke-width="2" fill="none" stroke-linecap="round" />
+      <path class="kc-bow" d="M15 43.5 l5.5 2.5 M25.5 48.5 l-5.5 2" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  #kite-companion {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+  .kc-string-svg {
+    position: absolute;
+    inset: 0;
+  }
+  .kc-string {
+    stroke: rgb(var(--color-secondary) / 0.45);
+    stroke-width: 1;
+  }
+  .kc-kite {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 2px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.18));
+  }
+  .kc-sail { fill: rgb(var(--color-primary)); }
+  .kc-tail, .kc-bow { stroke: rgb(var(--color-coral)); }
+
+  /* Perch mode (touch devices): parked below the header, bobbing */
+  #kite-companion.kc-perch .kc-string-svg { display: none; }
+  #kite-companion.kc-perch .kc-kite {
+    left: auto;
+    right: 1.25rem;
+    top: 4.5rem;
+    animation: kite-bob 4.5s ease-in-out infinite;
+    transition: translate 0.5s ease;
+  }
+  #kite-companion.kc-perch.kc-lift .kc-kite { translate: 0 -12px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    #kite-companion { display: none; }
+  }
+</style>
+
+<script>
+  const root = document.getElementById('kite-companion');
+  const kiteEl = root.querySelector('.kc-kite') as HTMLElement;
+  const stringEl = root.querySelector('.kc-string');
+  const fine = window.matchMedia('(pointer: fine)').matches;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let mx = window.innerWidth * 0.72;
+  let my = window.innerHeight * 0.4;
+  let kx = mx + 46, ky = my - 92;
+  let t = 0, raf = 0, running = false;
+  let liftTimer = 0;
+
+  const on = () => localStorage.getItem('kiteCompanion') !== 'off';
+
+  function frame() {
+    t += 0.016;
+    const tx = mx + 46;
+    const ty = my - 92 + Math.sin(t * 1.6) * 6;
+    const nx = kx + (tx - kx) * 0.085;
+    const ny = ky + (ty - ky) * 0.085;
+    const vx = nx - kx;
+    kx = nx; ky = ny;
+    const rot = Math.max(-24, Math.min(24, vx * 6 + Math.sin(t * 1.6) * 3));
+    kiteEl.style.transform = `translate(${kx - 17}px, ${ky - 23}px) rotate(${rot}deg)`;
+    const bx = kx, by = ky + 20;
+    const sag = Math.max(10, 80 - Math.hypot(bx - mx, by - my) * 0.22);
+    stringEl.setAttribute('d', `M ${mx} ${my} Q ${(mx + bx) / 2} ${(my + by) / 2 + sag}, ${bx} ${by}`);
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (running || !fine) return;
+    running = true;
+    raf = requestAnimationFrame(frame);
+  }
+  function stop() {
+    running = false;
+    cancelAnimationFrame(raf);
+  }
+
+  function show() {
+    root.hidden = false;
+    if (fine) start();
+    else root.classList.add('kc-perch');
+  }
+  function flyAway() {
+    stop();
+    const anim = kiteEl.animate(
+      [
+        { transform: kiteEl.style.transform || 'translate(0, 0)' },
+        { transform: `translate(${window.innerWidth + 80}px, -140px) rotate(38deg)` },
+      ],
+      { duration: 900, easing: 'cubic-bezier(0.4, 0, 1, 1)' }
+    );
+    stringEl.setAttribute('d', '');
+    anim.onfinish = () => { root.hidden = true; };
+  }
+
+  if (!reduce) {
+    if (on()) show();
+
+    window.addEventListener('pointermove', (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stop();
+      else if (!root.hidden && fine) start();
+    });
+
+    window.addEventListener('scroll', () => {
+      if (!root.classList.contains('kc-perch') || root.hidden) return;
+      root.classList.add('kc-lift');
+      clearTimeout(liftTimer);
+      liftTimer = window.setTimeout(() => root.classList.remove('kc-lift'), 500);
+    }, { passive: true });
+
+    kiteEl.addEventListener('click', () => {
+      localStorage.setItem('kiteCompanion', 'off');
+      flyAway();
+    });
+
+    window.addEventListener('kite:toggle', () => {
+      if (on()) {
+        localStorage.setItem('kiteCompanion', 'off');
+        if (!root.hidden) flyAway();
+      } else {
+        localStorage.setItem('kiteCompanion', 'on');
+        show();
+      }
+    });
+  }
+</script>
