@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Squiggle from '../components/Squiggle.astro';
 
 const projects = [
   {
@@ -26,6 +27,7 @@ const projects = [
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
         Projects
       </h1>
+      <Squiggle width={120} class="mb-5 -mt-2" />
       <p class="text-lg text-gray-600 dark:text-gray-400">
         Interactive tools, data explorations, and workshops I've built or co-organized.
       </p>
@@ -33,7 +35,7 @@ const projects = [
 
     <div class="grid gap-6">
       {projects.map((project) => (
-        <article class="group border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:border-blue-400 dark:hover:border-blue-500 transition-colors">
+        <article class="group border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
           {project.url ? (
             <a href={project.url} {...(project.url.startsWith('/') ? {} : { target: '_blank', rel: 'noopener noreferrer' })} class="block">
               <div class="flex items-start justify-between mb-2">

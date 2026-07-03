@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PaperEntry from '../components/PaperEntry.astro';
+import Squiggle from '../components/Squiggle.astro';
 
 const allPapers = await getCollection('research');
 const bySortOrder = (a, b) => a.data.sortOrder - b.data.sortOrder;
@@ -30,6 +31,7 @@ const sections = [
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
         Research
       </h1>
+      <Squiggle width={120} class="mb-5 -mt-2" />
       <p class="text-lg text-gray-600 dark:text-gray-400">
         Research papers, publications, and working papers on decentralized finance,
         blockchain economics, and market design for decentralized exchanges.

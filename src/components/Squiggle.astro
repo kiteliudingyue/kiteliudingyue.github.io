@@ -1,0 +1,23 @@
+---
+interface Props {
+  width?: number;
+  class?: string;
+}
+const { width = 150, class: className = '' } = Astro.props;
+---
+<svg
+  class={`squiggle ${className}`}
+  width={width}
+  height="10"
+  viewBox="0 0 150 10"
+  fill="none"
+  preserveAspectRatio="none"
+  aria-hidden="true"
+>
+  <path
+    d="M3 7 C 20 2, 36 9, 54 5 S 92 2, 110 6 S 138 4, 147 5"
+    stroke="currentColor"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+</svg>

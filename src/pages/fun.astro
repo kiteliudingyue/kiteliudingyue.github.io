@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ConcertCard from '../components/ConcertCard';
+import Squiggle from '../components/Squiggle.astro';
 
 const allConcerts = await getCollection('concerts');
 
@@ -46,6 +47,7 @@ const vlogs = [
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
         Fun & Personal
       </h1>
+      <Squiggle width={120} class="mb-5 -mt-2" />
       <p class="text-lg text-gray-600 dark:text-gray-400">
         Here's a few moments from some of the concerts I've been to. Hover over cards (or tap on mobile) to watch short video clips and click the speaker to hear the audio.
       </p>
@@ -78,6 +80,7 @@ const vlogs = [
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
           Vlogs
         </h2>
+        <Squiggle width={90} class="mb-4 -mt-1" />
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-10 max-w-3xl">
           Longer videos from travels, events, and everyday life.
         </p>
