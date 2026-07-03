@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@fontsource-variable/fraunces";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -11,6 +12,10 @@
   --color-accent: 99 102 241;
   --color-muted: 243 244 246;
   --color-border: 229 231 235;
+  /* Kite palette */
+  --color-sky: 125 211 252;
+  --color-coral: 244 116 94;
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
 }
 
 .dark {
@@ -22,6 +27,9 @@
   --color-accent: 129 140 248;
   --color-muted: 31 41 55;
   --color-border: 55 65 81;
+  /* Kite palette */
+  --color-sky: 56 130 199;
+  --color-coral: 251 143 125;
 }
 
 * {
@@ -61,4 +69,55 @@ body {
 :focus-visible {
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
+}
+
+/* --- Kite identity ------------------------------------------------ */
+
+h1, h2, h3,
+.font-display {
+  font-family: var(--font-display);
+  font-variation-settings: "SOFT" 40, "WONK" 0;
+  letter-spacing: -0.015em;
+}
+
+/* The hero name gets the playful cut of Fraunces */
+.wonky {
+  font-variation-settings: "SOFT" 100, "WONK" 1;
+}
+
+/* Kite-string squiggle under page titles */
+.squiggle {
+  display: block;
+  margin-top: 0.35rem;
+  color: rgb(var(--color-coral));
+}
+
+/* Scroll reveals — only ever applied by JS, so no-JS never hides content */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+/* Card tilt */
+.tilt-card {
+  transition: transform 0.15s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+@keyframes kite-bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-5px) rotate(4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init { opacity: 1; transform: none; }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
