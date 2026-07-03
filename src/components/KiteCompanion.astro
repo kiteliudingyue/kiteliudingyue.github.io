@@ -2,21 +2,24 @@
   <svg class="kc-string-svg" width="100%" height="100%">
     <path class="kc-string" d="" fill="none"></path>
   </svg>
-  <button class="kc-kite" tabindex="-1" title="Click to send the kite away">
+  <div class="kc-kite">
     <svg width="34" height="46" viewBox="0 0 40 54" fill="none">
       <path class="kc-sail" d="M20 2 L36 20 L20 40 L4 20 Z" />
       <path d="M20 2 L20 40 M4 20 L36 20" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" />
       <path class="kc-tail" d="M20 40 C 15 45, 26 47, 21 53" stroke-width="2" fill="none" stroke-linecap="round" />
       <path class="kc-bow" d="M15 43.5 l5.5 2.5 M25.5 48.5 l-5.5 2" stroke-width="2" stroke-linecap="round" />
     </svg>
-  </button>
+  </div>
 </div>
 
 <style>
+  /* z-index below the sticky header (z-50) so the kite glides behind it
+     and can never cover the nav or open mobile menu. The whole layer is
+     inert — the footer toggle is the only control. */
   #kite-companion {
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: 40;
     pointer-events: none;
   }
   .kc-string-svg {
@@ -32,10 +35,6 @@
     left: 0;
     top: 0;
     padding: 2px;
-    background: none;
-    border: 0;
-    cursor: pointer;
-    pointer-events: auto;
     filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.18));
   }
   .kc-sail { fill: rgb(var(--color-primary)); }
@@ -45,8 +44,9 @@
   #kite-companion.kc-perch .kc-string-svg { display: none; }
   #kite-companion.kc-perch .kc-kite {
     left: auto;
+    top: auto;
     right: 1.25rem;
-    top: 4.5rem;
+    bottom: 5.5rem;
     animation: kite-bob 4.5s ease-in-out infinite;
     transition: translate 0.5s ease;
   }
@@ -98,14 +98,21 @@
     cancelAnimationFrame(raf);
   }
 
+  let byeAnim: Animation | null = null;
+
   function show() {
+    // Cancel a fly-away still in flight so its onfinish can't re-hide us.
+    if (byeAnim) {
+      byeAnim.cancel();
+      byeAnim = null;
+    }
     root.hidden = false;
     if (fine) start();
     else root.classList.add('kc-perch');
   }
   function flyAway() {
     stop();
-    const anim = kiteEl.animate(
+    byeAnim = kiteEl.animate(
       [
         { transform: kiteEl.style.transform || 'translate(0, 0)' },
         { transform: `translate(${window.innerWidth + 80}px, -140px) rotate(38deg)` },
@@ -113,7 +120,10 @@
       { duration: 900, easing: 'cubic-bezier(0.4, 0, 1, 1)' }
     );
     stringEl.setAttribute('d', '');
-    anim.onfinish = () => { root.hidden = true; };
+    byeAnim.onfinish = () => {
+      root.hidden = true;
+      byeAnim = null;
+    };
   }
 
   if (!reduce) {
@@ -136,15 +146,11 @@
       liftTimer = window.setTimeout(() => root.classList.remove('kc-lift'), 500);
     }, { passive: true });
 
-    kiteEl.addEventListener('click', () => {
-      localStorage.setItem('kiteCompanion', 'off');
-      flyAway();
-    });
-
     window.addEventListener('kite:toggle', () => {
       if (on()) {
         localStorage.setItem('kiteCompanion', 'off');
         if (!root.hidden) flyAway();
+        else stop();
       } else {
         localStorage.setItem('kiteCompanion', 'on');
         show();

@@ -12,11 +12,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       The page you're looking for drifted off with the wind. You can play with the kite while you're here — grab it!
     </p>
 
-    <div id="kite-scene" class="relative mx-auto max-w-2xl h-[45vh] min-h-[300px] select-none touch-none">
+    <div id="kite-scene" class="relative mx-auto max-w-2xl h-[45vh] min-h-[300px] select-none">
       <svg id="scene-string-svg" class="absolute inset-0 w-full h-full" aria-hidden="true">
         <path id="scene-string" fill="none" stroke="rgb(var(--color-secondary) / 0.5)" stroke-width="1.5"></path>
       </svg>
-      <div id="scene-kite" class="absolute cursor-grab active:cursor-grabbing" style="left: 0; top: 0;">
+      <!-- touch-none only on the kite itself so the page still scrolls -->
+      <div id="scene-kite" class="absolute touch-none cursor-grab active:cursor-grabbing" style="left: 0; top: 0;">
         <svg width="90" height="118" viewBox="0 0 40 54" fill="none" aria-hidden="true">
           <path d="M20 2 L36 20 L20 40 L4 20 Z" fill="rgb(var(--color-primary))" />
           <path d="M20 2 L20 40 M4 20 L36 20" stroke="rgba(255,255,255,0.5)" stroke-width="1" />
@@ -67,11 +68,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     string.setAttribute('d', `M ${a.x} ${a.y} Q ${(a.x + bx) / 2 + 18} ${(a.y + by) / 2 + sag}, ${bx} ${by}`);
   }
 
+  let raf = 0;
+
   function tick() {
     t += 0.016;
     if (!dragging) {
-      const swayX = reduce ? 0 : Math.sin(t * 0.9) * 26;
-      const swayY = reduce ? 0 : Math.cos(t * 1.3) * 10;
+      const swayX = Math.sin(t * 0.9) * 26;
+      const swayY = Math.cos(t * 1.3) * 10;
       vx += (restX + swayX - px) * 0.02;
       vy += (restY + swayY - py) * 0.02;
       vx *= 0.94;
@@ -80,7 +83,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       py += vy;
     }
     render();
-    requestAnimationFrame(tick);
+    raf = requestAnimationFrame(tick);
   }
 
   function clientPos(e: PointerEvent) {
@@ -103,11 +106,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     vy = p.y - py;
     px = p.x;
     py = p.y;
+    if (reduce) render();
   });
-  kite.addEventListener('pointerup', () => { dragging = false; });
-  kite.addEventListener('pointercancel', () => { dragging = false; });
+  const release = () => {
+    dragging = false;
+    if (reduce) {
+      // no sway loop to spring it back — settle at rest instantly
+      px = restX;
+      py = restY;
+      vx = vy = 0;
+      render();
+    }
+  };
+  kite.addEventListener('pointerup', release);
+  kite.addEventListener('pointercancel', release);
 
   layout();
   render();
-  requestAnimationFrame(tick);
+  // Under reduced motion the kite hangs still (drag still works via render()
+  // in the pointer handlers); otherwise run the sway loop, paused with the tab.
+  if (!reduce) {
+    raf = requestAnimationFrame(tick);
+    document.addEventListener('visibilitychange', () => {
+      cancelAnimationFrame(raf);
+      if (!document.hidden) raf = requestAnimationFrame(tick);
+    });
+  }
 </script>

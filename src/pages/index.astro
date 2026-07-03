@@ -30,8 +30,6 @@ const cards = [
 				<span
 					class="block gradient-text wonky"
 					data-kite-launch
-					role="button"
-					tabindex="0"
 					title="✨ click me"
 				>Dingyue (Kite) Liu</span>
 			</h1>
@@ -93,7 +91,8 @@ const cards = [
 
 <style>
 	.gradient-text {
-		background: linear-gradient(120deg, #2563eb 0%, #7c6af0 45%, #f4745e 100%);
+		/* endpoint #e85d45 (not the coral var) keeps ≥3:1 contrast on white */
+		background: linear-gradient(120deg, #2563eb 0%, #7c6af0 45%, #e85d45 100%);
 		background-size: 200% 200%;
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;

@@ -20,9 +20,11 @@
   :global(.dark) .cloud {
     background: rgb(var(--color-sky) / 0.07);
   }
-  .cloud-1 { width: 180px; height: 44px; top: 16%; animation: cloud-drift 75s linear infinite; animation-delay: -15s; }
-  .cloud-2 { width: 120px; height: 32px; top: 58%; animation: cloud-drift 95s linear infinite; animation-delay: -50s; }
-  .cloud-3 { width: 240px; height: 56px; top: 34%; animation: cloud-drift 120s linear infinite; animation-delay: -85s; }
+  /* static left offsets keep the clouds scattered when the drift
+     animation is disabled under prefers-reduced-motion */
+  .cloud-1 { width: 180px; height: 44px; top: 16%; left: 8%; animation: cloud-drift 75s linear infinite; animation-delay: -15s; }
+  .cloud-2 { width: 120px; height: 32px; top: 58%; left: 55%; animation: cloud-drift 95s linear infinite; animation-delay: -50s; }
+  .cloud-3 { width: 240px; height: 56px; top: 34%; left: 30%; animation: cloud-drift 120s linear infinite; animation-delay: -85s; }
 
   @keyframes cloud-drift {
     from { transform: translateX(-280px); }

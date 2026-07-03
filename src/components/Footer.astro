@@ -69,10 +69,23 @@ const socialLinks = [
   .kite-footer-toggle svg {
     animation: kite-bob 5s ease-in-out infinite;
   }
+
+  /* The companion is disabled under reduced motion, so hide its control */
+  @media (prefers-reduced-motion: reduce) {
+    .kite-footer-toggle {
+      display: none;
+    }
+  }
 </style>
 
 <script>
-  document.getElementById('kite-footer-toggle')?.addEventListener('click', () => {
+  const toggle = document.getElementById('kite-footer-toggle');
+  const syncPressed = () => {
+    toggle?.setAttribute('aria-pressed', String(localStorage.getItem('kiteCompanion') !== 'off'));
+  };
+  syncPressed();
+  toggle?.addEventListener('click', () => {
     window.dispatchEvent(new CustomEvent('kite:toggle'));
+    syncPressed();
   });
 </script>

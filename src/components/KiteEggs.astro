@@ -59,14 +59,14 @@
 
   // --- Konami flock ---
   const SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let seqIdx = 0;
+  const keyBuf: string[] = [];
   let flockActive = false;
 
   window.addEventListener('keydown', (e) => {
-    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    seqIdx = key === SEQ[seqIdx] ? seqIdx + 1 : (key === SEQ[0] ? 1 : 0);
-    if (seqIdx === SEQ.length) {
-      seqIdx = 0;
+    keyBuf.push(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+    if (keyBuf.length > SEQ.length) keyBuf.shift();
+    if (keyBuf.length === SEQ.length && keyBuf.every((k, i) => k === SEQ[i])) {
+      keyBuf.length = 0;
       flock();
     }
   });
@@ -89,7 +89,13 @@
   }
 
   // --- Hero name launch ---
-  const CONFETTI_COLORS = ['#2563eb', '#f4745e', '#7dd3fc', '#7c6af0', '#fbbf24'];
+  // Palette vars follow the active theme, so chips stay visible in dark mode.
+  const CONFETTI_COLORS = [
+    'rgb(var(--color-primary))',
+    'rgb(var(--color-coral))',
+    'rgb(var(--color-accent))',
+    '#f59e0b',
+  ];
 
   function kiteFlight(x: number, y: number) {
     const layer = makeLayer();
@@ -123,7 +129,7 @@
           { transform: 'translate(0,0) rotate(0)', opacity: 1 },
           { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist * 0.7 + 50}px) rotate(${180 + i * 40}deg)`, opacity: 0 },
         ],
-        { duration: 950 + (i % 5) * 110, easing: 'cubic-bezier(0.2, 0.6, 0.4, 1)' }
+        { duration: 950 + (i % 5) * 110, easing: 'cubic-bezier(0.2, 0.6, 0.4, 1)', fill: 'forwards' }
       );
     }
     setTimeout(() => layer.remove(), 1600);
@@ -140,13 +146,5 @@
 
   document.querySelectorAll('[data-kite-launch]').forEach((el) => {
     el.addEventListener('click', (e) => launch((e as MouseEvent).clientX, (e as MouseEvent).clientY));
-    el.addEventListener('keydown', (e) => {
-      const ke = e as KeyboardEvent;
-      if (ke.key === 'Enter' || ke.key === ' ') {
-        ke.preventDefault();
-        const r = el.getBoundingClientRect();
-        launch(r.left + r.width / 2, r.top + r.height / 2);
-      }
-    });
   });
 </script>

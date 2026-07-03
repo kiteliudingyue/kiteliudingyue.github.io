@@ -16,8 +16,19 @@ if (!reduce && 'IntersectionObserver' in window) {
     { threshold: 0.12 }
   );
   els.forEach((el, i) => {
+    const delay = (i % 4) * 70;
     el.classList.add('reveal-init');
-    el.style.transitionDelay = `${(i % 4) * 70}ms`;
+    el.style.transitionDelay = `${delay}ms`;
     io.observe(el);
+    // After the entrance finishes, drop all reveal styling so it can't
+    // interfere with other transitions (e.g. .tilt-card) on the element.
+    // transitionend bubbles from children, so match element + property.
+    const onEnd = (e) => {
+      if (e.target !== el || e.propertyName !== 'opacity') return;
+      el.classList.remove('reveal-init', 'reveal-in');
+      el.style.transitionDelay = '';
+      el.removeEventListener('transitionend', onEnd);
+    };
+    el.addEventListener('transitionend', onEnd);
   });
 }
