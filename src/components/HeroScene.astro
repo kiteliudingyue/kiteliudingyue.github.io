@@ -41,6 +41,16 @@
 		</svg>
 		<div class="cloud cloud-2 night-cloud"></div>
 	</div>
+	<div class="scene scene-storm">
+		<div class="storm-sky"></div>
+		<div class="cloud cloud-1 storm-cloud"></div>
+		<div class="cloud cloud-3 storm-cloud"></div>
+		<div class="rain-wrap">
+			<div class="rain rain-a"></div>
+			<div class="rain rain-b"></div>
+		</div>
+		<div class="lightning"></div>
+	</div>
 </div>
 
 <script is:inline>
@@ -271,9 +281,80 @@
 		background: rgb(148 163 184 / 0.12);
 	}
 
+	[data-sky='storm'] .scene-storm {
+		opacity: 1;
+		visibility: visible;
+	}
+	.storm-sky {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			rgb(30 41 59 / 0.75) 0%,
+			rgb(51 65 85 / 0.4) 60%,
+			transparent 100%
+		);
+	}
+	.storm-cloud {
+		background: rgb(71 85 105 / 0.45);
+		filter: blur(14px);
+	}
+	/* Rain: 12px dashes in 1.5px columns (dash pattern scrolls behind a
+	   static column mask). translateY by the 26px vertical period loops
+	   seamlessly. Wrapper tilts the whole curtain. */
+	.rain-wrap {
+		position: absolute;
+		inset: -30%;
+		transform: rotate(10deg);
+	}
+	.rain {
+		position: absolute;
+		inset: 0;
+		background-image: repeating-linear-gradient(
+			to bottom,
+			rgb(148 163 184 / 0.28) 0 12px,
+			transparent 12px 26px
+		);
+		-webkit-mask-image: repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px 26px);
+		mask-image: repeating-linear-gradient(to right, black 0 1.5px, transparent 1.5px 26px);
+		animation: rain-fall 0.9s linear infinite;
+	}
+	.rain-b {
+		background-position: 0 13px;
+		-webkit-mask-position: 13px 0;
+		mask-position: 13px 0;
+		animation-duration: 1.15s;
+	}
+	@keyframes rain-fall {
+		from { transform: translateY(-26px); }
+		to { transform: translateY(0); }
+	}
+	/* Single soft flash per 7.5s cycle — well under the WCAG
+	   three-flashes-per-second threshold. */
+	.lightning {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			ellipse at 68% 10%,
+			rgb(226 232 240 / 0.9),
+			rgb(148 163 184 / 0.25) 35%,
+			transparent 65%
+		);
+		opacity: 0;
+		animation: lightning-flash 7.5s ease-out infinite;
+	}
+	@keyframes lightning-flash {
+		0%, 91%, 97%, 100% { opacity: 0; }
+		92.5% { opacity: 0.35; }
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.hero-scene :global(*) {
 			animation: none !important;
+		}
+		.rain-wrap,
+		.lightning {
+			display: none;
 		}
 	}
 </style>
