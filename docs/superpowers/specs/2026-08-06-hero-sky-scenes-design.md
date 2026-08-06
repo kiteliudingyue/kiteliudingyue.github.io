@@ -123,7 +123,9 @@ to `global.css`.
 
 ## Verification
 
-1. `npx astro check` and `npx astro build` pass.
+1. `npm run build` passes. (`astro check` is not used: `@astrojs/check` is not a
+   project dependency and adding it would violate the no-new-dependencies
+   constraint.)
 2. Dev-server screenshots of all six scenes in both themes via `?sky=`
    (browser-driven), checking visual quality and the bottom-edge blend.
 3. Contrast spot-checks of the headline/body/buttons over each backdrop.
