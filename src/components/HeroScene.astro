@@ -6,6 +6,12 @@
 		<div class="cloud cloud-3"></div>
 		<div class="cloud cloud-4"></div>
 	</div>
+	<div class="scene scene-dawn">
+		<div class="dawn-sky"></div>
+		<div class="dawn-sun"></div>
+		<div class="cloud cloud-1 dawn-cloud"></div>
+		<div class="cloud cloud-3 dawn-cloud"></div>
+	</div>
 </div>
 
 <script is:inline>
@@ -94,6 +100,46 @@
 		position: absolute;
 		inset: 0;
 		background: linear-gradient(to bottom, rgb(var(--color-sky) / 0.12), transparent 55%);
+	}
+
+	[data-sky='dawn'] .scene-dawn {
+		opacity: 1;
+		visibility: visible;
+	}
+	/* Alphas stay low mid-viewport so the coral end of the headline
+	   gradient (#e85d45, tuned for ≥3:1 on white) keeps its contrast. */
+	.dawn-sky {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			rgb(255 205 178 / 0.5) 0%,
+			rgb(255 194 203 / 0.22) 40%,
+			rgb(191 219 254 / 0.14) 72%,
+			transparent 100%
+		);
+	}
+	.dawn-sun {
+		position: absolute;
+		bottom: -10%;
+		left: 50%;
+		width: 340px;
+		height: 340px;
+		transform: translateX(-50%);
+		background: radial-gradient(
+			circle,
+			rgb(255 200 130 / 0.45),
+			rgb(255 170 120 / 0.16) 45%,
+			transparent 70%
+		);
+		animation: sun-pulse 9s ease-in-out infinite alternate;
+	}
+	@keyframes sun-pulse {
+		from { transform: translateX(-50%) scale(1); opacity: 0.85; }
+		to { transform: translateX(-50%) scale(1.06); opacity: 1; }
+	}
+	.dawn-cloud {
+		background: rgb(255 170 160 / 0.35);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
