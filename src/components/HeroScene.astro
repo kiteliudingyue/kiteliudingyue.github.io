@@ -26,6 +26,21 @@
 			<path class="wave wave-front" d="M-40 92 Q 80 74 200 92 T 440 92 T 680 92 T 920 92 T 1160 92 T 1400 92 T 1640 92 V 120 H -40 Z" />
 		</svg>
 	</div>
+	<div class="scene scene-night">
+		<div class="night-sky"></div>
+		<div class="stars stars-a"></div>
+		<div class="stars stars-b"></div>
+		<svg class="moon" viewBox="0 0 40 40">
+			<defs>
+				<mask id="hero-moon-cut">
+					<rect width="40" height="40" fill="white" />
+					<circle cx="26" cy="15" r="10" fill="black" />
+				</mask>
+			</defs>
+			<circle cx="20" cy="20" r="12" fill="rgb(226 232 240)" mask="url(#hero-moon-cut)" opacity="0.85" />
+		</svg>
+		<div class="cloud cloud-2 night-cloud"></div>
+	</div>
 </div>
 
 <script is:inline>
@@ -198,6 +213,63 @@
 	}
 	.gull-1 { top: 20%; animation-delay: -8s; }
 	.gull-2 { top: 27%; width: 18px; animation-delay: -34s; }
+
+	[data-sky='night'] .scene-night {
+		opacity: 1;
+		visibility: visible;
+	}
+	.night-sky {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			rgb(23 30 66 / 0.65) 0%,
+			rgb(30 41 59 / 0.35) 60%,
+			transparent 100%
+		);
+	}
+	/* Star fields: one 2px dot plus box-shadow copies. Base opacity is the
+	   pleasant static state under reduced motion; twinkle dims from there. */
+	.stars {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 2px;
+		height: 2px;
+		border-radius: 9999px;
+		background: currentColor;
+	}
+	.stars-a {
+		color: rgb(226 232 240 / 0.75);
+		box-shadow:
+			40px 60px, 120px 30px, 210px 90px, 300px 45px, 380px 130px,
+			460px 20px, 540px 80px, 620px 150px, 700px 40px, 780px 110px,
+			860px 25px, 930px 70px, 1010px 140px, 1090px 55px, 160px 170px,
+			520px 200px, 840px 190px, 80px 220px;
+		animation: twinkle 4s ease-in-out infinite alternate;
+	}
+	.stars-b {
+		color: rgb(191 219 254 / 0.9);
+		box-shadow:
+			90px 45px, 180px 120px, 270px 20px, 350px 95px, 430px 160px,
+			590px 50px, 660px 120px, 740px 180px, 820px 60px, 900px 130px,
+			980px 30px, 1060px 100px;
+		animation: twinkle 3s ease-in-out infinite alternate-reverse;
+	}
+	@keyframes twinkle {
+		from { opacity: 1; }
+		to { opacity: 0.35; }
+	}
+	.moon {
+		position: absolute;
+		top: 14%;
+		right: 12%;
+		width: 44px;
+		height: 44px;
+	}
+	.night-cloud {
+		background: rgb(148 163 184 / 0.12);
+	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.hero-scene :global(*) {
