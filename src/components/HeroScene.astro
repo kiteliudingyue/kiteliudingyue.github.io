@@ -51,6 +51,13 @@
 		</div>
 		<div class="lightning"></div>
 	</div>
+	<div class="scene scene-aurora">
+		<div class="aurora-sky"></div>
+		<div class="ribbon ribbon-1"></div>
+		<div class="ribbon ribbon-2"></div>
+		<div class="ribbon ribbon-3"></div>
+		<div class="stars stars-a"></div>
+	</div>
 </div>
 
 <script is:inline>
@@ -346,6 +353,55 @@
 	@keyframes lightning-flash {
 		0%, 91%, 97%, 100% { opacity: 0; }
 		92.5% { opacity: 0.35; }
+	}
+
+	[data-sky='aurora'] .scene-aurora {
+		opacity: 1;
+		visibility: visible;
+	}
+	.aurora-sky {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			rgb(30 27 75 / 0.65) 0%,
+			rgb(30 41 59 / 0.35) 55%,
+			transparent 100%
+		);
+	}
+	.ribbon {
+		position: absolute;
+		top: -12%;
+		width: 42%;
+		height: 65%;
+		border-radius: 9999px;
+		filter: blur(32px);
+		opacity: 0.4;
+		transform-origin: top center;
+		transform: rotate(var(--tilt));
+		animation: aurora-sway 14s ease-in-out infinite alternate;
+	}
+	.ribbon-1 {
+		--tilt: -14deg;
+		left: 6%;
+		background: linear-gradient(to bottom, rgb(52 211 153 / 0.55), transparent 80%);
+		animation-duration: 11s;
+	}
+	.ribbon-2 {
+		--tilt: -4deg;
+		left: 36%;
+		background: linear-gradient(to bottom, rgb(45 212 191 / 0.45), transparent 75%);
+		animation-direction: alternate-reverse;
+	}
+	.ribbon-3 {
+		--tilt: 10deg;
+		left: 62%;
+		background: linear-gradient(to bottom, rgb(167 139 250 / 0.45), transparent 80%);
+		animation-duration: 17s;
+	}
+	@keyframes aurora-sway {
+		from { transform: rotate(var(--tilt)) scaleY(1); }
+		to { transform: rotate(calc(var(--tilt) + 8deg)) scaleY(1.12); }
 	}
 
 	@media (prefers-reduced-motion: reduce) {
