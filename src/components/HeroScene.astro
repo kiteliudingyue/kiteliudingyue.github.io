@@ -121,6 +121,10 @@
 		opacity: 0;
 		visibility: hidden;
 	}
+	:global(.dark) .hero-scene:not([data-sky]) .scene-night {
+		opacity: 1;
+		visibility: visible;
+	}
 
 	/* Shared cloud primitives (breeze/dawn/sea/night/storm reuse these). */
 	.cloud {
